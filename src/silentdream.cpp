@@ -3,32 +3,30 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
+#include "log.h"
 
-static int init_log()
-{
-    int log_fd = open("/var/log/silentdream.log", O_CREAT|O_TRUNC, 0644);
-    if (log_fd < 0) {
-        fprintf(stderr, "open log file failed!\n");
-        return -1;
-    } 
-
-    int ret = dup2(log_fd, 2);
-    if (ret < 0) {
-        fprintf(stderr, "dup2:%s\n", strerror(errno));
-        return -1;
-    }
-    close(log_fd);
-    stderr = fdopen(ret, "w");    
-
-    return 0;
-}
 
 int main(int argc, char **argv)
 {
-    init_log();
+    initLog();
 
-    fprintf(stderr, "starting silentdream main process...\n");
-    fflush(stderr);
+    LOGI("starting silentdream main process...");
+    LOGV("hello 123")
+
+    int ret = fork();
+    if (ret < 0) {
+        LOGE("fork:%s", strerror(errno));
+    } else if (ret == 0) {
+        sleep(3);
+        LOGI("I'am here!");
+        for (;;) {
+            sleep(1);
+        }
+        LOGI("exit!");
+    } else {
+        _exit(0);
+    }
 
     return 0;
 }

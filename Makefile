@@ -4,8 +4,8 @@ BUILD_DIR := build
 #add source directories here
 SRC_DIR := src 
 INC_DIR :=
-CFLAGS := -g -std=c99 $(INC_DIR)
-CXXFLAGS:= -g -std=c++11 $(INC_DIR)
+CFLAGS := -g -Werror -std=c99 $(INC_DIR)
+CXXFLAGS:= -g -Werror -std=c++11 $(INC_DIR)
 LDFLAGS:=
 
 vpath %.c $(SRC_DIR)
