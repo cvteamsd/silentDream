@@ -6,7 +6,7 @@ SRC_DIR := src
 INC_DIR :=
 CFLAGS := -g -Werror -std=c99 $(INC_DIR)
 CXXFLAGS:= -g -Werror -std=c++11 $(INC_DIR)
-LDFLAGS:=
+LDFLAGS:= -pthread
 
 vpath %.c $(SRC_DIR)
 vpath %.cpp $(SRC_DIR)
@@ -39,6 +39,9 @@ clean:
 
 test:
 	@echo $(OBJ)
+
+kill:
+	-@kill -9 `ps aux|grep '$(TARGET)$$'|grep -v grep|awk '{print $$2}'`
 
 install:
 	cp $(BUILD_DIR)/$(TARGET) /usr/local/bin
