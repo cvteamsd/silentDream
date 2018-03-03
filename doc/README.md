@@ -12,14 +12,14 @@
  2. 所有的接口都是异步的。
 
 ### 总体架构
- 主框架是一个单线程，一个epoll循环；所有的模块都由epoll通知回调。
+ 主框架是一个单线程，一个epoll循环；所有的模块都由epoll通知回调。  
  所有模块的接口都应当是异步的，模块本身内部也有一个Looper-Handler循环。
  
 ### 目录结构
-  src/
-   include 框架提供的api。
-   modules 所有模块。
-   apps 业务应用。
+  src/  
+   include 框架提供的api。  
+   modules 所有模块。  
+   apps 业务应用。  
  
  
 
