@@ -1,7 +1,7 @@
 #ifndef _ARGUMENT_PARSER_H
 #define _ARGUMENT_PARSER_H
 
-#include "SilentDream.h"
+#include <SilentDream/SilentDream.h>
 
 class ArgumentParser {
 public:

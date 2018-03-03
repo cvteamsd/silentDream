@@ -3,7 +3,7 @@ BUILD_DIR := build
 
 #add source directories here
 SRC_DIR := src 
-INC_DIR :=
+INC_DIR := -Isrc/include  -Isrc/modules
 CFLAGS := -g -Werror -std=c99 $(INC_DIR)
 CXXFLAGS:= -g -Werror -std=c++11 $(INC_DIR)
 LDFLAGS:= -pthread

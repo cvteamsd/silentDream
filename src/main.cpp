@@ -1,5 +1,5 @@
-#include "SilentDream.h"
-#include "Log.h"
+#include <SilentDream/SilentDream.h>
+#include <SilentDream/Log.h>
 #include "ArgumentParser.h"
 
 

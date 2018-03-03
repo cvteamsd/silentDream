@@ -8,9 +8,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "SilentDream.h"
+#include <SilentDream/SilentDream.h>
+#include <SilentDream/Log.h>
 #include "ArgumentParser.h"
-#include "Log.h"
 
 
 SilentDream* SilentDream::self = nullptr;
