@@ -11,6 +11,7 @@
 #include <SilentDream/SilentDream.h>
 #include <SilentDream/Log.h>
 #include "ArgumentParser.h"
+#include "Epoll.h"
 
 
 SilentDream* SilentDream::self = nullptr;
@@ -28,6 +29,7 @@ SilentDream* SilentDream::instance()
 }
 
 SilentDream::SilentDream()
+    : mLoop(new Loop())
 {
 
 }
@@ -44,6 +46,9 @@ int SilentDream::exec(ArgumentParser& argParser)
         return execDaemon();
     }
 
+    for (;;) {
+        mLoop->run();
+    }
 
     return 0;
 }

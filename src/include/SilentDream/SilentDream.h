@@ -4,7 +4,9 @@
 #include <pthread.h>
 #include <signal.h>
 
+
 class ArgumentParser;
+class Loop;
 
 
 class SilentDream {
@@ -26,6 +28,8 @@ private:
     SilentDream& operator=(const SilentDream&);
 
     static SilentDream* self;
+
+	Loop* mLoop;
 
 private:
     int initSignalHandler();

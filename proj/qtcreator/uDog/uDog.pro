@@ -12,8 +12,10 @@ SOURCES += \
     src/SilentDream.cpp \
     src/ArgumentParser.cpp \
     src/Log.cpp \
-    src/Epoll.cpp
+    src/Epoll.cpp \
+    src/Socket.cpp
 
 HEADERS += \
     src/ArgumentParser.h \
-    src/Epoll.h
+    src/Epoll.h \
+    src/Socket.h
