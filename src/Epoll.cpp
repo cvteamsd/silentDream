@@ -5,18 +5,7 @@ void Loop::run()
     mTimePoint = std::chrono::system_clock::now();
 
     for (;;) {
-        for (auto &c : mClosing) {
-            mNumPolls--;
-            c.second(c.first);
-
-            if (!mNumPolls) {
-                mClosing.clear();
-                return;
-            }
-        }
-        mClosing.clear();
-
-        if (mNumPolls==0 && mNumTimers==0) {
+        if (mNumPolls==0 && mTimers.size()==0) {
             break;
         }
 
@@ -26,7 +15,12 @@ void Loop::run()
         for (int i = 0; i < numFdReady; ++i) {
             Poll* poll = (Poll*)mReadyEvents[i].data.ptr;
             int status = -bool(mReadyEvents[i].events & EPOLLERR);
-            mCallbacks.at(poll->fd())(poll, status, mReadyEvents[i].events);
+            auto it = mCallbacks.find(poll->fd());
+            if (it != mCallbacks.end()) {
+                it->second(poll, status, mReadyEvents[i].events);
+            } else {
+                LOGE("no callback!");
+            }
         }
 
         while (mTimers.size() && mTimers[0].timepoint < mTimePoint) {

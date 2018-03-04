@@ -7,6 +7,8 @@
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <execinfo.h>
+#include <assert.h>
 
 #include <SilentDream/SilentDream.h>
 #include <SilentDream/Log.h>
@@ -46,8 +48,33 @@ int SilentDream::exec(ArgumentParser& argParser)
         return execDaemon();
     }
 
+    initSignalHandler();
+    sleep(1);
+    raise(SIGINT);
+    sleep(1);
+//    LOGI("exit");
+//    exit(0);
+
+
+    Timer* timer = new Timer(mLoop);
+    int count = 0;
+    bool quit = false;
+    timer->start([&count, &quit](Timer* timer) {
+        ++count;
+        LOGI("hello %d", count);
+        *((int*)0) = 1;
+        if (count == 10) {
+           quit = true;
+            timer->stop();
+        }
+    }, 1000, 1000);
+
     for (;;) {
         mLoop->run();
+        if (quit)
+            break;
+
+        usleep(1000);
     }
 
     return 0;
@@ -57,6 +84,18 @@ int SilentDream::exec(ArgumentParser& argParser)
 int SilentDream::initSignalHandler()
 {
     sigfillset(&mSignalMask);
+
+    struct sigaction act;
+    act.sa_flags = 0;
+    sigemptyset(&act.sa_mask);
+    act.sa_handler = [](int signo) {
+        LOGI("signal: %d", signo);
+    };
+    int ret = sigaction(SIGSEGV, &act, NULL);
+    assert(ret == 0);
+    ret = sigaction(SIGINT, &act, NULL);
+    assert(ret == 0);
+
 
     int err;
     if ((err = pthread_sigmask(SIG_BLOCK, &mSignalMask, &mOldSignalMask)) != 0) {
@@ -103,8 +142,22 @@ void* SilentDream::signalThreadHandler(void *arg)
             LOGI("hello SIGTERM");
             break;
 
-        case SIGSEGV:
+        case SIGSEGV: {
             LOGI("hello SIGSEGV");
+            char* stack[20] = {0};
+            int depth = backtrace(reinterpret_cast<void**>(stack), sizeof(stack)/sizeof(stack[0]));
+            if (depth){
+                char** symbols = backtrace_symbols(reinterpret_cast<void**>(stack), depth);
+                if (symbols){
+                    for(int i = 0; i < depth; i++){
+                        printf("===[%d]:%s\n", (i+1), symbols[i]);
+                    }
+                }
+                free(symbols);
+            }
+
+        }
+            exit(SIGSEGV);
             break;
 
         case SIGCHLD:

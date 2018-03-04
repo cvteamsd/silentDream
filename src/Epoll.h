@@ -9,13 +9,17 @@
 #include <algorithm>
 #include <vector>
 #include <map>
+#include <functional>
 
+#include <SilentDream/Log.h>
+
+class Timer;
 class Poll;
 
 using Callback = void(*)(Poll*, int, int);
 
 struct Timepoint {
-    void (*cb)(Timer *);
+    std::function<void(Timer *)> cb;
     Timer *timer;
     std::chrono::system_clock::time_point timepoint;
     int nextDelay;
@@ -43,7 +47,6 @@ public:
             t
         );
 
-        ++mNumTimers;
         updateNextDelay();
     }
 
@@ -58,8 +61,11 @@ public:
         }
 
         mCancelledLastTimer = true;
-        --mNumTimers;
         updateNextDelay();
+    }
+
+    std::chrono::system_clock::time_point now() {
+        return mTimePoint = std::chrono::system_clock::now();
     }
 
     int add(int fd, epoll_event *event) {
@@ -67,7 +73,7 @@ public:
         return epoll_ctl(mFd, EPOLL_CTL_ADD, fd, event);
     }
 
-    int del(int fd) {
+    int remove(int fd) {
         epoll_event e;
 
         --mNumPolls;
@@ -82,20 +88,12 @@ public:
         mCallbacks[fd] = cb;
     }
 
-    void closeFd(Poll* poll, void(*cb)(Poll*)) {
-        mClosing.push_back({poll, cb});
-    }
-
 private:
-    std::chrono::system_clock::time_point now() {
-        return mTimePoint = std::chrono::system_clock::now();
-    }
-
     void updateNextDelay() {
         mDelay = -1;
         if (mTimers.size()) {
             mDelay = std::max<int>(std::chrono::duration_cast<std::chrono::milliseconds>(
-                                       mTimers[0].timepoint - mTimePoint), 0);
+                                       mTimers[0].timepoint - mTimePoint).count(), -1);
         }
     }
 
@@ -104,13 +102,11 @@ private:
     epoll_event mReadyEvents[1024];
     std::chrono::system_clock::time_point mTimePoint;
     int mDelay = -1;
-    int mNumTimers = 0;
     std::vector<Timepoint> mTimers;
     bool mCancelledLastTimer = false;
 
     int mNumPolls = 0;
     std::map<int,Callback> mCallbacks;
-    std::vector<std::pair<Poll*, void(*)(Poll*)>> mClosing;
 };
 
 class Timer {
@@ -122,10 +118,10 @@ public:
     virtual ~Timer() {
     }
 
-    void start(void(*cb)(Timer*), int timeout, int repeat = 0) {
+    void start(std::function<void(Timer*)> cb, int timeout, int repeat = 0) {
         std::chrono::system_clock::time_point timepoint = mLoop->now() +
                 std::chrono::milliseconds(timeout);
-        Timepoint t{cb, this, timepoint, repeat};
+        Timepoint t = {cb, this, timepoint, repeat};
         mLoop->addTimer(t);
     }
 
@@ -147,6 +143,7 @@ public:
         , mFd(fd) {
     }
 
+    //caller should close fd himself
     virtual ~Poll() {
         if (mTimer) {
             cancelTimeout();
@@ -161,7 +158,7 @@ public:
     }
 
     virtual void stop() {
-        mLoop->del(mFd);
+        mLoop->remove(mFd);
     }
 
     virtual void change(int events) {
@@ -186,25 +183,14 @@ public:
         mTimer = nullptr;
     }
 
-    virtual int write(char* buf, size_t size);
-
-    virtual void close(void(*cb)(Poll*)) {
-        mFd = -1;
-        mLoop->closeFd(this, cb);
-    }
-
-    bool isClosed() {
-        return mFd == -1;
-    }
-
     int fd() const {
         return mFd;
     }
 
 protected:
     Loop *mLoop;
-    int mFd;
-    Timer* mTimer;
+    int mFd = -1;
+    Timer* mTimer = nullptr;
 };
 
 class Async : public Poll {
@@ -213,11 +199,15 @@ public:
         : Poll(loop, ::eventfd(0, EFD_CLOEXEC)) {
     }
 
+    ~Async() {
+        ::close(mFd);
+    }
+
     void start(void (*cb)(Async*)) {
         this->cb = cb;
         Poll::setCb([](Poll* p, int, int) {
             uint64_t val;
-            if (::read(mFd, &val, 8) == 8) {
+            if (::read(p->fd(), &val, 8) == 8) {
                ((Async*)p)->cb((Async*)p);
             }
         });
@@ -229,14 +219,6 @@ public:
         if (::write(mFd, &one, 8) != 8) {
             return;
         }
-    }
-
-    void close() {
-        Poll::stop();
-        ::close(mFd);
-        Poll::close([](Poll *p) {
-            delete p;
-        });
     }
 
     void setData(void *data) {
