@@ -15,8 +15,8 @@ int ArgumentParser::parse()
     return 0;
 }
 
-SilentDream::RunMode ArgumentParser::getRunMode() const
+RunMode ArgumentParser::getRunMode() const
 {
-//    return SilentDream::DAEMON;
-    return SilentDream::CLIENT;
+//    return DAEMON;
+    return CLIENT;
 }

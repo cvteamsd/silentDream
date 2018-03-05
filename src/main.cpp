@@ -1,6 +1,9 @@
-#include <SilentDream/SilentDream.h>
+#include <SilentDream/Global.h>
 #include <SilentDream/Log.h>
 #include "ArgumentParser.h"
+#include "SilentDreamBase.h"
+#include "SilentDream.h"
+#include "SilentDreamClient.h"
 
 
 int main(int argc, char **argv)
@@ -10,7 +13,21 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    Log::initLogMode(argParser.getRunMode());
+    RunMode runMode = argParser.getRunMode();
+    Log::initLogMode(runMode);
 
-    return SilentDream::instance()->exec(argParser);
+    SilentDreamBase* s = nullptr;
+    if (runMode == CLIENT) {
+        s = new SilentDreamClient(argParser);
+    } else {
+        s = new SilentDream();
+    }
+
+    s->init();
+    int ret = s->exec();
+    s->destroy();
+
+    delete s;
+
+    return ret;
 }

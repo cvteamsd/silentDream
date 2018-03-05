@@ -2,8 +2,7 @@
 #define _LOG_H
 
 #include <sys/syscall.h>  
-
-#include "SilentDream.h"
+#include "Global.h"
 
 class Log {
 public:
@@ -14,7 +13,7 @@ public:
         LOG_LEVEL_ERR,
     };
 
-    static int initLogMode(SilentDream::RunMode runMode);
+    static int initLogMode(RunMode runMode);
     static void getCurrentTime(char *timebuf);
     static void doLog(int level, const char* format,...);
 
@@ -39,10 +38,10 @@ private:
     } while (0)
 
 
-#define LOGV(format,...) LOG(Log::LOG_LEVEL_VERBOSE, TOSTRING(V), format, ##__VA_ARGS__)
-#define LOGI(format,...) LOG(Log::LOG_LEVEL_INFO, TOSTRING(I), format, ##__VA_ARGS__)
-#define LOGW(format,...) LOG(Log::LOG_LEVEL_WARN, TOSTRING(W), format, ##__VA_ARGS__)
-#define LOGE(format,...) LOG(Log::LOG_LEVEL_ERR, TOSTRING(E), format, ##__VA_ARGS__)
+#define LOGV(format, ...) LOG(Log::LOG_LEVEL_VERBOSE, TOSTRING(V), format, ##__VA_ARGS__)
+#define LOGI(format, ...) LOG(Log::LOG_LEVEL_INFO, TOSTRING(I), format, ##__VA_ARGS__)
+#define LOGW(format, ...) LOG(Log::LOG_LEVEL_WARN, TOSTRING(W), format, ##__VA_ARGS__)
+#define LOGE(format, ...) LOG(Log::LOG_LEVEL_ERR, TOSTRING(E), format, ##__VA_ARGS__)
 
 
 #endif

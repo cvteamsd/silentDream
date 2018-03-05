@@ -10,9 +10,9 @@
 
 Log::LogLevel Log::sLogLevel  = LOG_LEVEL_VERBOSE;
 
-int Log::initLogMode(SilentDream::RunMode runMode)
+int Log::initLogMode(RunMode runMode)
 {
-    if (runMode == SilentDream::DAEMON) {
+    if (runMode == DAEMON) {
         FILE* fp_log = fopen("/var/log/silentdream.log", "a");
         if (fp_log == NULL) {
             LOGE("open log file failed:%s\n", strerror(errno));
