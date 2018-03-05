@@ -1,0 +1,10 @@
+git comman config
+
+git config --global commit.template ~/silentDream/doc/git.template
+git config --global user.email gygy19990@126.com
+git config --global user.name guokai
+git config --global core.editor vim
+
+
+git address
+git clone ssh://git@101.228.56.221:8022/silentDream.git
