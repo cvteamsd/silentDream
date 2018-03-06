@@ -1,11 +1,11 @@
 ## SilentDream help
 
-1. Repository address  
+#### 1. Repository address  
 ```
 &nbsp;&nbsp;  git clone ssh://git@silentdream.dynu.net:8022/silentDream.git
 ```
 
-2. Git custom settings  
+#### 2. Git custom settings  
 
 ```
 git config  user.name $(username)
@@ -21,7 +21,7 @@ email_address | your email address
 project_root_dir | your project location  
 
 
-3. build & run
+#### 3. build & run
 
 
 ##### build:
