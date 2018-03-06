@@ -1,11 +1,23 @@
 ## SilentDream help
 
-#### 1. Repository address  
+#### 1. Download source code  
+
+##### 1.1 Get repository list:
 ```
-&nbsp;&nbsp;  git clone ssh://git@silentdream.dynu.net:8022/silentDream.git
+ssh -p 8022 git@silentdream.dynu.net
+&nbsp;
+if you failed with "Permission denied (publickey).", please check your key.
+otherwise, it will show your username and project list.
+
 ```
 
-#### 2. Git custom settings  
+##### 1.2 Framework repository address 
+```
+git clone ssh://git@silentdream.dynu.net:8022/silentDream.git
+```
+
+
+#### 2. Customize your git 
 
 ```
 git config  user.name $(username)
@@ -24,13 +36,13 @@ project_root_dir | your project location
 #### 3. build & run
 
 
-##### build:
+##### 3.1 build
 ```
 cd $(project_root_dir);
 make
 ```
 
-##### run:
+##### 3.2 run
 ```
 sudo ./build/silentDream [args]
 ```
