@@ -3,6 +3,7 @@
 #include <SilentDream/Global.h>
 #include <SilentDream/Log.h>
 #include "SignalHandler.h"
+#include <sstream>
 
 
 SignalHandler* SignalHandler::self = nullptr;
@@ -118,6 +119,7 @@ void SignalHandler::hardwareSigHander(int signo)
 
 void SignalHandler::dumpstack()
 {
+#if 0
     char* stack[20] = {0};
     int depth = backtrace(reinterpret_cast<void**>(stack), sizeof(stack)/sizeof(stack[0]));
     if (depth){
@@ -129,6 +131,39 @@ void SignalHandler::dumpstack()
         }
         free(symbols);
     }
+#elif 1
+    unw_cursor_t cursor; unw_context_t uc;
+    unw_word_t ip, sp;
+
+    std::stringstream ss;
+
+    ss << "\n";
+
+    char sym[256];
+    unw_word_t offset;
+
+    unw_getcontext(&uc);
+    unw_init_local(&cursor, &uc);
+    while (unw_step(&cursor) > 0) {
+        unw_get_reg(&cursor, UNW_REG_IP, &ip);
+        unw_get_reg(&cursor, UNW_REG_SP, &sp);
+
+        ss << "    0x" << std::hex << ip;
+        if (unw_get_proc_name(&cursor, sym, sizeof(sym), &offset) == 0) {
+            char* nameptr = sym;
+            int status;
+            char* demangled = abi::__cxa_demangle(sym, nullptr, nullptr, &status);
+            if (status == 0) {
+              nameptr = demangled;
+            }
+            ss << " (" << nameptr << "+0x" << offset <<")\n";
+
+            free(demangled);
+        }
+    }
+    LOGE("%s", ss.str().c_str());
+
+#endif
 }
 
 

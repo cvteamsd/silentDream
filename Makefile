@@ -6,7 +6,7 @@ SRC_DIR := src
 INC_DIR := -Isrc/include  -Isrc/modules
 CFLAGS := -g -Werror -std=c99 $(INC_DIR)
 CXXFLAGS:= -g -Werror -std=c++11 $(INC_DIR)
-LDFLAGS:= -pthread
+LDFLAGS:= -pthread -lunwind
 
 vpath %.c $(SRC_DIR)
 vpath %.cpp $(SRC_DIR)
@@ -26,7 +26,7 @@ $(BUILD_DIR):
 	mkdir $(BUILD_DIR)
 
 $(BUILD_DIR)/$(TARGET):$(OBJ)
-	g++ -o $@ $(LDFLAGS) $^
+	g++ -o $@ $^ $(LDFLAGS)
 
 $(BUILD_DIR)/%.o:%.c |$(BUILD_DIR)
 	gcc $(CFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
