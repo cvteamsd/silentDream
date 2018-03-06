@@ -5,9 +5,6 @@
 #include <setjmp.h>
 #include <signal.h>
 
-#include <cxxabi.h>
-#define UNW_LOCAL_ONLY
-#include <libunwind.h>
 
 class SignalHandler
 {

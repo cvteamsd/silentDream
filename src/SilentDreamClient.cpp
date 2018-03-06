@@ -16,7 +16,7 @@ int SilentDreamClient::exec()
 {
 //    sleep(1);
 //    raise(SIGINT);
-    sleep(1);
+    usleep(10000);
 
     Timer* timer = new Timer(mLoop);
     int count = 0;
