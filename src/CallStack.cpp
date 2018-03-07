@@ -5,24 +5,25 @@
 #include <SilentDream/Log.h>
 #include "CallStack.h"
 
-CallStack::CallStack()
+CallStack::CallStack(std::ostream& os, std::string tag)
 {
     buildMap();
-    unwind();
+    unwind(os, tag);
 }
 
-void CallStack::unwind()
+void CallStack::unwind(std::ostream& os, std::string tag)
 {
     unw_cursor_t cursor; unw_context_t uc;
     unw_word_t ip;
 
     const MapEntry *entry = nullptr;
-    std::stringstream ss;
 
-    ss << "\n" << std::showbase ;
+    os << "\n";
+    os << std::hex;
 
     char sym[256];
     unw_word_t offset;
+    int step = 0;
 
     unw_getcontext(&uc);
     unw_init_local(&cursor, &uc);
@@ -33,17 +34,22 @@ void CallStack::unwind()
         if (ip == 0)
             break;
 
+        if (step == 0) {
+            os << "Backtrace:\n";
+        }
+
         entry = findMapEntry(ip);
 
         if (entry) {
-//            ss.width(8);
-            ss.fill('0');
-            ss << "  0x" << std::setw(8) << (ip - (unw_word_t)entry->start);
-            ss.fill(' ');
-            ss << "  " << std::setw(60) << std::left << entry->name << "  ";
+            os.fill('0');
+//            os << "  " << tag << " #" << std::setw(2) << std::right << step << "  " << std::setw(8) << (ip - (unw_word_t)entry->start);
+            os << "  " << tag << " #" << std::setw(2) << std::right << step << "  " << std::setw(8) << ip;
+            os.fill(' ');
+            os << "  " << std::setw(70) << std::left << entry->name << "  ";
         } else {
-            ss << "0x" << std::setw(8) << ip;
-            ss.operator<<(std::endl);
+            os.fill('0');
+            os << tag << "  0x" << std::setw(8) << ip;
+            os.fill(' ');
         }
         if (unw_get_proc_name(&cursor, sym, sizeof(sym), &offset) == 0) {
             char* nameptr = sym;
@@ -52,14 +58,13 @@ void CallStack::unwind()
             if (status == 0) {
               nameptr = demangled;
             }
-            ss.fill(' ');
-            ss << "(" << nameptr << "+" << offset <<")\n";
+            os << "(" << nameptr << "+" << offset <<")\n";
 
             free(demangled);
         }
-    }
-    LOGE("%s", ss.str().c_str());
 
+        ++step;
+    }
 }
 
 

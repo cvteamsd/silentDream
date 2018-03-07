@@ -7,14 +7,15 @@
 #include <sys/mman.h>
 #include <string>
 #include <deque>
+#include <ostream>
 
 class CallStack
 {
 public:
-    CallStack();
+    CallStack(std::ostream& os, std::string tag = "");
 
 private:
-   void unwind();
+   void unwind(std::ostream&os, std::string tag);
 
     struct MapEntry {
         uintptr_t start;

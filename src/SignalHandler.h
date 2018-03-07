@@ -2,8 +2,9 @@
 #define SIGNALHANDLER_H
 
 #include <pthread.h>
-#include <setjmp.h>
 #include <signal.h>
+#include <ostream>
+#include <functional>
 
 
 class SignalHandler
@@ -12,31 +13,29 @@ public:
     static SignalHandler& instace();
     ~SignalHandler();
 
+    void setCustomSignalHandler(sigset_t set, std::function<void(int)> handler);
     int install();
-
-    void setMonitorSignals(sigset_t signals);
-    int setCustomSigHandler(int signo, void(*)(int));
-
-    sigjmp_buf mSigJmpBuf;
 
 private:
     SignalHandler();
     static SignalHandler* self;
 
-    int initSignalMonitor();
+    int initPlatformSignalHandlers();
+    static void unexpectedSignalHandler(int, siginfo_t*, void*);
+    static const char* getSignalName(int signal_number);
+    static const char* getSignalCodeName(int signal_number, int signal_code);
+    static void dumpstack(std::ostream &os);
 
-    int setHardwareSigHandler();
-    static void hardwareSigHander(int signo);
-    static void dumpstack();
-
-    void (*mCustomHandlers[32])(int);
+    int initCustomSignalHandlers();
+    static void* customSignalThreadFn(void *arg);
 
 
+    sigset_t mCustomSignalMask;
+    std::function<void(int)> mCustomSignalHandler;
 
     sigset_t mSignalMask;
     sigset_t mOldSignalMask;
     pthread_t mSignalTid;
-    static void* customSignalThreadFn(void *arg);
 };
 
 #endif // SIGNALHANDLER_H

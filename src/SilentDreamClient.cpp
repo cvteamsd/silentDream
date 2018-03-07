@@ -15,7 +15,7 @@ SilentDreamClient::~SilentDreamClient()
 int SilentDreamClient::exec()
 {
 //    sleep(1);
-//    raise(SIGINT);
+    kill(getpid(), SIGINT);
     usleep(10000);
 
     Timer* timer = new Timer(mLoop);
@@ -24,10 +24,10 @@ int SilentDreamClient::exec()
     timer->start([&count, &quit](Timer* timer) {
         ++count;
         LOGI("hello count: %d", count);
-        *((int*)0) = 1;
         if (count == 10) {
            quit = true;
             timer->stop();
+        *((int*)10) = 1;
         }
     }, 1000, 1000);
 
