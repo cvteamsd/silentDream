@@ -47,4 +47,8 @@ make
 sudo ./build/silentDream [args]
 ```
 
-
+##### 3.3 dependencies
+```
+# for C++ callback debug info
+sudo apt-get install libunwind8-dev
+```
