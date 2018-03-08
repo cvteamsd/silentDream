@@ -165,7 +165,7 @@ int SignalHandler::initPlatformSignalHandlers()
     return 0;
 }
 
-void SignalHandler::unexpectedSignalHandler(int signal_number, siginfo_t *info, void* context)
+void SignalHandler::unexpectedSignalHandler(int signal_number, siginfo_t *info, void* )
 {
     static bool handlingUnexpectedSignal = false;
     if (handlingUnexpectedSignal) {

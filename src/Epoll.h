@@ -9,12 +9,15 @@
 #include <algorithm>
 #include <vector>
 #include <map>
+#include <list>
+#include <mutex>
 #include <functional>
 
 #include <SilentDream/Log.h>
 
 class Timer;
 class Poll;
+class Async;
 
 using Callback = void(*)(Poll*, int, int);
 
@@ -28,14 +31,8 @@ struct Timepoint {
 class Loop
 {
 public:
-    Loop() {
-        mFd = epoll_create(1024);
-        mTimePoint = std::chrono::system_clock::now();
-    }
-
-    virtual ~Loop() {
-        ::close(mFd);
-    }
+    Loop();
+    virtual ~Loop();
 
     virtual void run();
 
@@ -88,6 +85,10 @@ public:
         mCallbacks[fd] = cb;
     }
 
+    void sendRequest(std::function<bool(void*)> cb, void *data);
+
+
+
 private:
     void updateNextDelay() {
         mDelay = -1;
@@ -107,6 +108,10 @@ private:
 
     int mNumPolls = 0;
     std::map<int,Callback> mCallbacks;
+
+    std::recursive_mutex mRequestLock;
+    std::list<std::pair<std::function<bool(void*)>,void*>> mRequests;
+    Async* mHandler;
 };
 
 class Timer {
@@ -203,7 +208,7 @@ public:
         ::close(mFd);
     }
 
-    void start(void (*cb)(Async*)) {
+    void start(std::function<void(Async*)> cb) {
         this->cb = cb;
         Poll::setCb([](Poll* p, int, int) {
             uint64_t val;
@@ -230,7 +235,7 @@ public:
     }
 
 private:
-    void (*cb)(Async*);
+    std::function<void(Async*)> cb;
     void* mData;
 };
 

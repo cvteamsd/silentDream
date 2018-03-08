@@ -1,8 +1,33 @@
+#include <assert.h>
 #include "Epoll.h"
+
+Loop::Loop()
+{
+    mFd = epoll_create(1024);
+    mTimePoint = std::chrono::system_clock::now();
+
+    mHandler = new Async(this);
+}
+
+Loop::~Loop()
+{
+   ::close(mFd);
+}
 
 void Loop::run()
 {
     mTimePoint = std::chrono::system_clock::now();
+
+    mHandler->start([this](Async* ) {
+        std::lock_guard<std::recursive_mutex> _l(mRequestLock);
+
+        for (auto &p : mRequests) {
+            p.first(p.second);
+            mRequests.pop_front();
+        }
+
+        assert(mRequests.size()==0);
+    });
 
     for (;;) {
         if (mNumPolls==0 && mTimers.size()==0) {
@@ -41,3 +66,21 @@ void Loop::run()
         }
     }
 }
+
+void Loop::sendRequest(std::function<bool(void *)> cb, void *data)
+{
+    mRequestLock.lock();
+    mRequests.push_back({cb, data});
+    mHandler->notify();
+    mRequestLock.unlock();
+}
+
+
+
+
+
+
+
+
+
+

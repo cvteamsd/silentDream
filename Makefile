@@ -2,6 +2,8 @@ TARGET := silentdream
 BUILD_DIR := build
 
 #add source directories here
+CC=gcc
+CXX=g++
 SRC_DIR := src 
 INC_DIR := -Isrc/include  -Isrc/modules
 CFLAGS := -g -Werror -std=c99 $(INC_DIR)
@@ -26,13 +28,13 @@ $(BUILD_DIR):
 	mkdir $(BUILD_DIR)
 
 $(BUILD_DIR)/$(TARGET):$(OBJ)
-	g++ -o $@ $^ $(LDFLAGS)
+	$(CXX) -o $@ $^ $(LDFLAGS)
 
 $(BUILD_DIR)/%.o:%.c |$(BUILD_DIR)
-	gcc $(CFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+	$(CC) $(CFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 
 $(BUILD_DIR)/%.o:%.cpp |$(BUILD_DIR)
-	g++ $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
 
 clean:
 	-rm -rf $(BUILD_DIR)
