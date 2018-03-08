@@ -2,7 +2,7 @@
 #include "Epoll.h"
 
 SilentDreamClient::SilentDreamClient(ArgumentParser &argParser)
-    : mArgParser(argParser)
+        : mArgParser(argParser)
 {
 
 }
@@ -14,31 +14,21 @@ SilentDreamClient::~SilentDreamClient()
 
 int SilentDreamClient::exec()
 {
-//    sleep(1);
-    kill(getpid(), SIGINT);
-    usleep(10000);
+    Timer* timer = new Timer(mLoop, this);
 
-    Timer* timer = new Timer(mLoop);
-    int count = 0;
-    bool quit = false;
-    timer->start([&count, &quit](Timer* timer) {
+    timer->start([](Timer* timer) {
+        static int count = 0;
+
         ++count;
         LOGI("hello count: %d", count);
         if (count == 10) {
-           quit = true;
             timer->stop();
-        *((int*)10) = 1;
+            timer->loop()->requestExit();
+//            *((int*)10) = 1;
         }
     }, 1000, 1000);
 
-    for (;;) {
-        mLoop->run();
-        if (quit)
-            break;
-
-        usleep(1000);
-    }
+    mLoop->run();
 
     return 0;
-
 }

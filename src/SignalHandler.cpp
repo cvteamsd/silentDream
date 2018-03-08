@@ -31,7 +31,6 @@ SignalHandler::SignalHandler()
 
 SignalHandler::~SignalHandler()
 {
-
 }
 
 inline void SignalHandler::setCustomSignalHandler(sigset_t set, std::function<void(int)> handler)
@@ -40,9 +39,11 @@ inline void SignalHandler::setCustomSignalHandler(sigset_t set, std::function<vo
     mCustomSignalHandler = handler;
 }
 
-int SignalHandler::install()
+int SignalHandler::install(Loop* loop)
 {
     int ret;
+
+    mLoop = loop;
 
     ret = initCustomSignalHandlers();
     assert(ret == 0);
@@ -115,24 +116,25 @@ void* SignalHandler::customSignalThreadFn(void *arg)
 
        case SIGINT: {
            LOGE("SIGINT");
-
+           s->mLoop->requestExit();
        }
        break;
 
        case SIGQUIT: {
            LOGE("SIGQUIT");
-
+           s->mLoop->requestExit();
        }
        break;
 
        case SIGTERM: {
            LOGE("SIGTERM");
-
+           s->mLoop->requestExit();
        }
        break;
 
        default:
-           LOGW("Unhandler signal:%d", signo);
+           LOGW("Unexpected signal:%d", signo);
+           s->mLoop->requestExit();
            break;
        }
    }

@@ -6,6 +6,8 @@
 #include <ostream>
 #include <functional>
 
+#include "Epoll.h"
+
 
 class SignalHandler
 {
@@ -14,7 +16,7 @@ public:
     ~SignalHandler();
 
     void setCustomSignalHandler(sigset_t set, std::function<void(int)> handler);
-    int install();
+    int install(Loop *loop);
 
 private:
     SignalHandler();
@@ -30,6 +32,7 @@ private:
     static void* customSignalThreadFn(void *arg);
 
 
+    Loop* mLoop = nullptr;
     sigset_t mCustomSignalMask;
     std::function<void(int)> mCustomSignalHandler;
 

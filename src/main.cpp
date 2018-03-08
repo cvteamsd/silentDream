@@ -1,3 +1,4 @@
+#include <memory>
 #include <SilentDream/Global.h>
 #include <SilentDream/Log.h>
 #include "ArgumentParser.h"
@@ -16,18 +17,18 @@ int main(int argc, char **argv)
     RunMode runMode = argParser.getRunMode();
     Log::initLogMode(runMode);
 
-    SilentDreamBase* s = nullptr;
+    std::shared_ptr<SilentDreamBase> s;
     if (runMode == CLIENT) {
-        s = new SilentDreamClient(argParser);
+        s.reset(new SilentDreamClient(argParser));
     } else {
-        s = new SilentDream();
+        s.reset(new SilentDream());
     }
 
-    s->init();
-    int ret = s->exec();
-    s->destroy();
+    int ret;
 
-    delete s;
+    s->init();
+    ret = s->exec();
+    s->destroy();
 
     return ret;
 }

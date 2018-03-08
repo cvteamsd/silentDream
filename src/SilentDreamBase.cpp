@@ -17,7 +17,7 @@ SilentDreamBase::~SilentDreamBase()
 
 int SilentDreamBase::init()
 {
-    SignalHandler::instace().install();
+    SignalHandler::instace().install(mLoop);
 
     return 0;
 }
