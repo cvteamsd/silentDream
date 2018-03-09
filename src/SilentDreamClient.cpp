@@ -14,15 +14,13 @@ SilentDreamClient::~SilentDreamClient()
 
 int SilentDreamClient::exec()
 {
-    Timer* timer = new Timer(mLoop, this);
-
+    std::shared_ptr<Timer> timer(new Timer(mLoop, this));
     timer->start([](Timer* timer) {
         static int count = 0;
 
         ++count;
         LOGI("hello count: %d", count);
         if (count == 10) {
-            timer->stop();
             timer->loop()->requestExit();
 //            *((int*)10) = 1;
         }
