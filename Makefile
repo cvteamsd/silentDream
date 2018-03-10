@@ -1,6 +1,25 @@
 include Define.mk
 
+.PHONY:all clean silentdream extra_target
 all:$(OBJS_DIR) $(LIBS_DIR) $(PLUGIN_DIR) silentdream pre_install
+
+clean:
+	@make silentdream TARGET:=clean
+
+silentdream:
+	@make -C$(BASE_DIR)/src $(TARGET)
+	@make -C$(BASE_DIR)/src/main $(TARGET)
+	@make extra_target
+
+
+EXTRA_DIRS := modules apps
+extra_target:
+	@for dir in $(EXTRA_DIRS);do \
+		if [ -f $$dir/Makefile ];then \
+		 make -C$$dir $(TARGET) || exit "$$?"; \
+		fi; \
+	done;
+
 
 $(OBJS_DIR):
 	-mkdir -p $@ 
@@ -10,15 +29,6 @@ $(LIBS_DIR):
 
 $(PLUGIN_DIR):
 	-mkdir -p $@ 
-
-clean:
-	@make silentdream TARGET:=clean
-
-silentdream:
-	@make -C$(BASE_DIR)/src $(TARGET)
-	@make -C$(BASE_DIR)/src/main $(TARGET)
-	@make -C$(BASE_DIR)/apps/hello $(TARGET)
-
 
 ######################
 pre_install:$(BUILD_DIR)/conf
@@ -42,3 +52,6 @@ uninstall:
 
 kill:
 	-kill `ps aux|grep 'silentdream$$'|grep -v grep|awk '{print $$2}'`
+
+
+

@@ -43,7 +43,7 @@ project_root_dir | your project location
 sudo apt-get install libunwind8-dev
 ```
 
-##### 3.2 build
+##### 3.2 build silentdream
 ```
 cd $(project_root_dir);
 make
@@ -80,9 +80,9 @@ make kill
 ```
 
 #### 6. How to add a plugin
-1. create a directory. 
+1. create a plugin directory in `apps`, `modules` or some other place.
 
-2. cp Makefile from src directory as template, and modify it.
+2. cp Makefile from `src` directory to your plugin directory, modify it.
 
 Variable | Explanation
 --------|-------------
@@ -112,22 +112,26 @@ target:plugin
 include $(BASE_DIR)/Footer.mk
 ```
 
-3. add an entry in root path's Makefile to your module.
+3. run `source setenv.sh` setup environment variables. 
 ```
-silentdream:
-    @make -C$(BASE_DIR)/src $(TARGET)
-    @make -C$(BASE_DIR)/src/main $(TARGET)
-    #add here
-    @make -C'your module path' $(TARGET)
-
+cd $(project_root_dir);
+source setenv.sh;
 ```
 
+4. now you can cd to your plugin directory and do something.
+* build plugin
+    ```
+    make
+    ```
+* clean plugin
+    ```
+    make clean
+    ```
+* install plugin (should install silentdream first)
+    ```
+    make install_plugin
+    ```
 
-
-&nbsp;  
-&nbsp;  
-
-####  FAQ
 
 
 

@@ -53,4 +53,8 @@ $(OBJ_DIR)/%.o:%.cpp |$(OBJ_DIR)
 clean:
 	-rm -rf $(OBJ_DIR)
 
+install_plugin:
+	-cp $(PLUGIN_DIR)/lib$(MODULE).so ~/.silentdream/plugins/ -rf
+
+
 endif
