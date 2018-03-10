@@ -20,7 +20,7 @@ private:
     int checkRunning(); 
 
 
-
+    int a;
 };
 
 

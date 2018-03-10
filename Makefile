@@ -1,56 +1,44 @@
-TARGET := silentdream
-BUILD_DIR := build
+include Define.mk
 
-#add source directories here
-CC=gcc
-CXX=g++
-SRC_DIR := src 
-INC_DIR := -Isrc/include  -Isrc/modules
-CFLAGS := -g -Werror -std=c99 $(INC_DIR)
-CXXFLAGS:= -g -Werror -std=c++11 $(INC_DIR)
-LDFLAGS:= -pthread -lunwind
+all:$(OBJS_DIR) $(LIBS_DIR) $(PLUGIN_DIR) silentdream pre_install
 
-vpath %.c $(SRC_DIR)
-vpath %.cpp $(SRC_DIR)
-SRC := $(foreach dir, $(SRC_DIR), $(wildcard $(dir)/*.c))
-SRC += $(wildcard *.c)
-SRC += $(foreach dir, $(SRC_DIR), $(wildcard $(dir)/*.cpp))
-SRC += $(wildcard *.cpp)
+$(OBJS_DIR):
+	-mkdir -p $@ 
 
-OBJ := $(SRC:.c=.o)
-OBJ := $(OBJ:.cpp=.o)
-OBJ := $(addprefix $(BUILD_DIR)/, $(notdir $(OBJ)))
+$(LIBS_DIR):
+	-mkdir -p $@ 
 
-all:$(BUILD_DIR)/$(TARGET)
-
--include $(OBJ:.o=.dep)
-$(BUILD_DIR):
-	mkdir $(BUILD_DIR)
-
-$(BUILD_DIR)/$(TARGET):$(OBJ)
-	$(CXX) -o $@ $^ $(LDFLAGS)
-
-$(BUILD_DIR)/%.o:%.c |$(BUILD_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
-
-$(BUILD_DIR)/%.o:%.cpp |$(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@ -MD -MF $(@:.o=.dep)
+$(PLUGIN_DIR):
+	-mkdir -p $@ 
 
 clean:
-	-rm -rf $(BUILD_DIR)
+	@make silentdream TARGET:=clean
 
-test:
-	@echo $(OBJ)
+silentdream:
+	@make -C$(BASE_DIR)/src $(TARGET)
+	@make -C$(BASE_DIR)/src/main $(TARGET)
+	@make -C$(BASE_DIR)/apps/hello $(TARGET)
 
-kill:
-	-@kill -9 `ps aux|grep '$(TARGET)$$'|grep -v grep|awk '{print $$2}'`
 
-install:
-	cp $(BUILD_DIR)/$(TARGET) /usr/local/bin
-	if [ ! -d /etc/silentdream ];then \
-	    mkdir /etc/silentdream; \
+######################
+pre_install:$(BUILD_DIR)/conf
+	@cp conf/* $< -rf
+
+$(BUILD_DIR)/conf:
+	@-mkdir -p $@
+
+install:pre_install
+	@if [ ! -d ~/.silentdream ];then \
+	    mkdir ~/.silentdream; \
     fi
-	cp conf/* /etc/silentdream -rf
+	@cp build/* ~/.silentdream -rf
+	@ln -s ~/.silentdream/silentdream -t ~/bin/ -rf
+	@echo "install success!"
 
 uninstall:
-	rm /usr/local/bin/$(TARGET)
+	@-rm ~/bin/silentdream
+	@-rm ~/.silentdream -rf
+	@echo "uninstall success!";
+
+kill:
+	-kill `ps aux|grep 'silentdream$$'|grep -v grep|awk '{print $$2}'`

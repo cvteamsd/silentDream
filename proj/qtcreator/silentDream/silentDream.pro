@@ -11,7 +11,7 @@ DEFINES +=
 LIBS += -pthread
 
 SOURCES += \
-    src/main.cpp \
+    src/main/main.cpp \
     src/SilentDream.cpp \
     src/ArgumentParser.cpp \
     src/Log.cpp \
