@@ -1,4 +1,4 @@
-ifndef $(HEADER_MK)
+ifndef HEADER_MK
 HEADER_MK = 1
 
 # include $(BASE_DIR)/Define.mk

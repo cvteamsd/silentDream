@@ -1,4 +1,4 @@
-ifndef $(DEFINE_MK)
+ifndef DEFINE_MK
 DEFINE_MK = 1
 
 export BASE_DIR := $(shell pwd)

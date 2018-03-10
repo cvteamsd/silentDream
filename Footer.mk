@@ -1,4 +1,4 @@
-ifndef $(FOOTER_MK)
+ifndef FOOTER_MK
 FOOTER_MK = 1
 
 CFLAGS := -g -Werror -std=c99 -fPIC
