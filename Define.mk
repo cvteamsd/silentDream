@@ -28,10 +28,6 @@ for dir in $(2);do \
 done;
 endef
 
-define save-tab
-	$(eval)
-endef
-
 define make-in-subdirs 
 target clean:; 
 	$(call cur-subdirs)
