@@ -7,6 +7,8 @@ INCLUDE :=
 LDFLAGS := 
 LIBS    := -pthread -lunwind
 
-target:shared_library
+
+$(call build-target, shared_library)
 
 include $(BASE_DIR)/Footer.mk
+

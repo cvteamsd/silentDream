@@ -1,12 +1,12 @@
 include $(BASE_DIR)/Header.mk
 
-MODULE  := hello
+MODULE  :=
 SRC_DIR :=
 DEFINE  :=
 INCLUDE :=
 LDFLAGS := 
 LIBS    := 
 
-target:plugin
+$(call build-target, plugin)
 
 include $(BASE_DIR)/Footer.mk

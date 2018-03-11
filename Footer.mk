@@ -1,6 +1,11 @@
 ifndef FOOTER_MK
 FOOTER_MK = 1
 
+ifeq ($(MODULE),)
+ MODULE := $(notdir $(CURDIR))
+ # MODULE := $(notdir $(shell pwd))
+endif
+
 CFLAGS := -g -Werror -std=c99 -fPIC
 CXXFLAGS:= -g -Werror -std=c++11 -fPIC
 

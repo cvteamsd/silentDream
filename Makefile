@@ -4,6 +4,8 @@ TARGET_DIRS:= $(OBJS_DIR) $(LIBS_DIR) $(PLUGIN_DIR) $(CONF_DIR)
 EXTRA_DIRS := modules apps
 .PHONY:all clean silentdream $(TARGET_DIRS) $(EXTRA_DIRS)
 
+
+all: TARGET:=target
 all:$(TARGET_DIRS) silentdream pre_install
 
 clean: TARGET:=clean

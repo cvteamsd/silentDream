@@ -12,6 +12,9 @@ export MAKE := make --no-print-directory
 
 endif
 
+ifndef DEFINE_MACRO
+DEFINE_MACRO=1
+
 define cur-subdirs
 	$(eval subdirs :=$(shell find . -maxdepth 1 -type d))
 	$(eval subdirs :=$(basename $(patsubst ./%,%,$(subdirs))))
@@ -34,4 +37,16 @@ target clean:;
 	$(call cur-subdirs)
 	@$(call make-in-subdirs2, $$@, $(subdirs))
 endef
+
+define set-build-target
+target:$(1)
+	@echo -n
+endef
+
+define build-target
+$(eval $(call set-build-target, $(1)))
+endef
+
+
+endif
 
