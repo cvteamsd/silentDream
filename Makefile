@@ -10,9 +10,9 @@ clean: TARGET:=clean
 clean:silentdream
 
 silentdream:
-	@$(MAKE) --no-print-directory -C$(BASE_DIR)/src $(TARGET)
-	@$(MAKE) --no-print-directory -C$(BASE_DIR)/src/main $(TARGET)
-	@$(MAKE) --no-print-directory extra_target TARGET=$(TARGET)
+	@$(MAKE) -C$(BASE_DIR)/src $(TARGET)
+	@$(MAKE) -C$(BASE_DIR)/src/main $(TARGET)
+	@$(MAKE) extra_target TARGET=$(TARGET)
 
 extra_target:$(EXTRA_DIRS)
 

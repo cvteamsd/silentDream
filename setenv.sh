@@ -8,3 +8,4 @@ export LIBS_DIR=$BUILD_DIR/lib
 export PLUGIN_DIR=$BUILD_DIR/plugins
 export CONF_DIR=$BUILD_DIR/conf
 export OBJS_DIR=$BASE_DIR/objs
+export MAKE="make --no-print-directory"
