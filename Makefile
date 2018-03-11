@@ -1,41 +1,30 @@
 include Define.mk
 
-.PHONY:all clean silentdream extra_target
-all:$(OBJS_DIR) $(LIBS_DIR) $(PLUGIN_DIR) silentdream pre_install
+TARGET_DIRS:= $(OBJS_DIR) $(LIBS_DIR) $(PLUGIN_DIR) $(CONF_DIR)
+EXTRA_DIRS := modules apps
+.PHONY:all clean silentdream $(TARGET_DIRS) $(EXTRA_DIRS)
 
-clean:
-	@make silentdream TARGET:=clean
+all:$(TARGET_DIRS) silentdream pre_install
+
+clean: TARGET:=clean
+clean:silentdream
 
 silentdream:
 	@make -C$(BASE_DIR)/src $(TARGET)
 	@make -C$(BASE_DIR)/src/main $(TARGET)
-	@make extra_target
+	@make extra_target TARGET=$(TARGET)
 
+extra_target:$(EXTRA_DIRS)
 
-EXTRA_DIRS := modules apps
-extra_target:
-	@for dir in $(EXTRA_DIRS);do \
-		if [ -f $$dir/Makefile ];then \
-		 make -C$$dir $(TARGET) || exit "$$?"; \
-		fi; \
-	done;
+$(EXTRA_DIRS):
+	@make -C$@ $(TARGET)
 
-
-$(OBJS_DIR):
-	-mkdir -p $@ 
-
-$(LIBS_DIR):
-	-mkdir -p $@ 
-
-$(PLUGIN_DIR):
+$(TARGET_DIRS):
 	-mkdir -p $@ 
 
 ######################
-pre_install:$(BUILD_DIR)/conf
-	@cp conf/* $< -rf
-
-$(BUILD_DIR)/conf:
-	@-mkdir -p $@
+pre_install:
+	@cp conf/* $(CONF_DIR) -rf
 
 install:pre_install
 	@if [ ! -d ~/.silentdream ];then \
