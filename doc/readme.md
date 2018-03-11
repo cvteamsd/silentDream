@@ -74,7 +74,12 @@ silentDream [args]
 ```
 
 
-##### 5.2 kill running silentdream daemon
+##### 5.2 view running silentdream daemon
+```
+make ps
+```
+
+##### 5.3 kill silentdream daemon
 ```
 make kill
 ```
@@ -86,28 +91,27 @@ make kill
 
 Variable | Explanation
 --------|-------------
-MODULE  | your module name.
-SRC_DIR | add your sub directories, your module root directory does **NOT** need add.
+MODULE  | your plugin name, default value is current directory name.
+SRC_DIR | add your sub directories, your plugin root directory does **NOT** need add.
 DEFINE  | macro defines.
 INCLUDE | include path, **src/include/** has added already. 
 LDFLAGS | link flags. 
 LIBS    | link libraries. 
-target  | executable, plugin, shared_library or static_library.
+build-target  | executable, plugin, shared_library or static_library.
 
 
 For example: 
-
 ```Makefile
 include $(BASE_DIR)/Header.mk
 
-MODULE  := hello
+MODULE  := 
 SRC_DIR := 
 DEFINE  :=
 INCLUDE := 
 LDFLAGS := 
 LIBS    := 
 
-target:plugin
+$(call build-target, plugin)
 
 include $(BASE_DIR)/Footer.mk
 ```
