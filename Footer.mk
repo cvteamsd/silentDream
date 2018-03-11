@@ -27,28 +27,34 @@ static_library:$(LIBS_DIR)/lib$(MODULE).a
 executable:$(BUILD_DIR)/$(MODULE)
 
 $(PLUGIN_DIR)/lib$(MODULE).so:$(OBJ)
-	$(CXX) -shared $(LDFLAGS) -o$@ $^ $(LIBS)
+	@$(CXX) -shared $(LDFLAGS) -o$@ $^ $(LIBS)
+	@echo "  PLUGIN  \033[1m\033[32mlib$(MODULE).so\033[0m"
 
 $(LIBS_DIR)/lib$(MODULE).so:$(OBJ)
-	$(CXX) -shared $(LDFLAGS) -o$@ $^ $(LIBS)
+	@$(CXX) -shared $(LDFLAGS) -o$@ $^ $(LIBS)
+	@echo "  LINK    \033[1m\033[32mlib$(MODULE).so\033[0m"
 
 $(LIBS_DIR)/lib$(MODULE).a:$(OBJ)
-	$(AR) -r $@ $^
+	@$(AR) -r $@ $^
+	@echo "  AR      \033[1m\033[32mlib$(MODULE).a\033[0m"
 
 $(BUILD_DIR)/$(MODULE):$(OBJ)
-	$(CXX) $(LDFLAGS) -o$@ $^ $(LIBS)
+	@$(CXX) $(LDFLAGS) -o$@ $^ $(LIBS)
+	@echo "  BUILD   \033[1m\033[32m$(MODULE)\033[0m"
 
 
 -include $(OBJ:.o=.dep)
 
 $(OBJ_DIR):
-	mkdir $(OBJ_DIR)
+	@mkdir $(OBJ_DIR)
 
 $(OBJ_DIR)/%.o:%.c |$(OBJ_DIR)
-	$(CC) $(CFLAGS) $(DEFINE) $(COMMON_INC) $(INCLUDE) -c $< -o $@ -MD -MF $(@:.o=.dep)
+	@$(CC) $(CFLAGS) $(DEFINE) $(COMMON_INC) $(INCLUDE) -c $< -o $@ -MD -MF $(@:.o=.dep)
+	@echo "  CC      $<"
 
 $(OBJ_DIR)/%.o:%.cpp |$(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) $(DEFINE) $(COMMON_INC) $(INCLUDE) -c $< -o $@ -MD -MF $(@:.o=.dep)
+	@$(CXX) $(CXXFLAGS) $(DEFINE) $(COMMON_INC) $(INCLUDE) -c $< -o $@ -MD -MF $(@:.o=.dep)
+	@echo "  CXX     $<"
 
 clean:
 	-rm -rf $(OBJ_DIR)

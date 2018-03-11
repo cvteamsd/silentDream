@@ -19,7 +19,7 @@ endef
 define make-in-subdirs2
 for dir in $(2);do \
 	if [ -f $$$$dir/Makefile ];then \
-	 make -C$$$$dir $(1) || exit "$$$$?"; \
+	 $(MAKE) -C$$$$dir $(1) || exit "$$$$?"; \
 	fi; \
 done;
 endef

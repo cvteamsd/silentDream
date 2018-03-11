@@ -10,17 +10,17 @@ clean: TARGET:=clean
 clean:silentdream
 
 silentdream:
-	@make -C$(BASE_DIR)/src $(TARGET)
-	@make -C$(BASE_DIR)/src/main $(TARGET)
-	@make extra_target TARGET=$(TARGET)
+	@$(MAKE) --no-print-directory -C$(BASE_DIR)/src $(TARGET)
+	@$(MAKE) --no-print-directory -C$(BASE_DIR)/src/main $(TARGET)
+	@$(MAKE) --no-print-directory extra_target TARGET=$(TARGET)
 
 extra_target:$(EXTRA_DIRS)
 
 $(EXTRA_DIRS):
-	@make -C$@ $(TARGET)
+	@$(MAKE) -C$@ $(TARGET)
 
 $(TARGET_DIRS):
-	-mkdir -p $@ 
+	@-mkdir -p $@ 
 
 ######################
 pre_install:
