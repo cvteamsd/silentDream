@@ -9,7 +9,9 @@ public:
     SilentDream();
     virtual ~SilentDream();
 
-    int exec();
+    virtual int init();
+    virtual int destroy();
+    virtual int exec();
 
 private:
     SilentDream(const SilentDream&);
@@ -18,9 +20,6 @@ private:
 private:
     int daemonize();
     int checkRunning(); 
-
-
-    int a;
 };
 
 

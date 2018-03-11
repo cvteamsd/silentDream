@@ -42,7 +42,17 @@ uninstall:
 	@echo "uninstall success!";
 
 kill:
-	-kill `ps aux|grep 'silentdream$$'|grep -v grep|awk '{print $$2}'`
+	@pid=`ps aux|grep 'silentdream$$'|grep -v grep|awk '{print $$2}'`; \
+	if [ -n "$$pid"  ];then \
+		echo kill pid: $$pid; \
+		kill $$pid;   \
+	fi
+
+ps:
+	@str=`ps aux |grep 'silentdream$$'|grep -v grep`; \
+	if [ -n "$$str" ];then \
+		echo $$str; \
+	fi
 
 
 

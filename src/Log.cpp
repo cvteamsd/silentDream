@@ -12,10 +12,18 @@ Log::LogLevel Log::sLogLevel  = LOG_LEVEL_VERBOSE;
 
 int Log::initLogMode(RunMode runMode)
 {
+    char buf[256];
+    getcwd(buf, 256);
+//    PRINT("CWD:%s", buf);
+
+    if (ensureDirectoryExist("log") < 0) {
+        return -1;
+    }
+
     if (runMode == DAEMON) {
-        FILE* fp_log = fopen("/var/log/silentdream.log", "a");
+        FILE* fp_log = fopen("log/silentdream.log", "a");
         if (fp_log == NULL) {
-            LOGE("open log file failed:%s\n", strerror(errno));
+            PRINT("open log file failed:%s\n", strerror(errno));
             return -1;
         }
 
@@ -23,6 +31,8 @@ int Log::initLogMode(RunMode runMode)
         setbuf(stdout, NULL);
 
         fclose(fp_log);
+
+        PRINT("\n\n===================================================================");
     }
 
     return 0;

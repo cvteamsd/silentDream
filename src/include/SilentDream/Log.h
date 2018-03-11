@@ -30,18 +30,34 @@ private:
 #define LOG_TAG __FILE__ ":" STRINGIFY(__LINE__) 
 #endif
 
-#define LOG(level, levelStr, format, ...) \
+#define LOGV(format, ...) \
     do { \
         char timebuf[30]; \
         Log::getCurrentTime(timebuf); \
-        Log::doLog(level, "%s %d %d %s %s " format "\n", timebuf, getpid(), gettid(), levelStr, LOG_TAG, ##__VA_ARGS__); \
+        Log::doLog(Log::LOG_LEVEL_VERBOSE, "%s %d %d %s %s " format "\n", timebuf, getpid(), gettid(), TOSTRING(V), LOG_TAG, ##__VA_ARGS__); \
     } while (0)
 
+#define LOGI(format, ...) \
+    do { \
+        char timebuf[30]; \
+        Log::getCurrentTime(timebuf); \
+        Log::doLog(Log::LOG_LEVEL_INFO, "%s %d %d %s %s " format "\n", timebuf, getpid(), gettid(), TOSTRING(I), LOG_TAG, ##__VA_ARGS__); \
+    } while (0)
 
-#define LOGV(format, ...) LOG(Log::LOG_LEVEL_VERBOSE, TOSTRING(V), format, ##__VA_ARGS__)
-#define LOGI(format, ...) LOG(Log::LOG_LEVEL_INFO, TOSTRING(I), format, ##__VA_ARGS__)
-#define LOGW(format, ...) LOG(Log::LOG_LEVEL_WARN, TOSTRING(W), format, ##__VA_ARGS__)
-#define LOGE(format, ...) LOG(Log::LOG_LEVEL_ERR, TOSTRING(E), format, ##__VA_ARGS__)
+#define LOGW(format, ...) \
+    do { \
+        char timebuf[30]; \
+        Log::getCurrentTime(timebuf); \
+        Log::doLog(Log::LOG_LEVEL_WARN, "%s %d %d %s %s " format "\n", timebuf, getpid(), gettid(), TOSTRING(W), LOG_TAG, ##__VA_ARGS__); \
+    } while (0)
 
+#define LOGE(format, ...) \
+    do { \
+        char timebuf[30]; \
+        Log::getCurrentTime(timebuf); \
+        Log::doLog(Log::LOG_LEVEL_ERR, "%s %d %d %s %s " format "\n", timebuf, getpid(), gettid(), TOSTRING(E), LOG_TAG, ##__VA_ARGS__); \
+    } while (0)
+
+#define PRINT(format,...) printf(format "\n", ##__VA_ARGS__)
 
 #endif

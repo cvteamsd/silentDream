@@ -14,6 +14,9 @@ public:
 private:
     int parse();
 
+    int argc;
+    char **argv;
+
 };
 
 

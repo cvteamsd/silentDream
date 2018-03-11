@@ -21,7 +21,8 @@ SOURCES += \
     src/SilentDreamWorker.cpp \
     src/SignalHandler.cpp \
     src/SilentDreamBase.cpp \
-    src/CallStack.cpp
+    src/CallStack.cpp \
+    src/Util.cpp
 
 HEADERS += \
     src/ArgumentParser.h \
@@ -34,4 +35,5 @@ HEADERS += \
     src/include/SilentDream/Global.h \
     src/SilentDreamBase.h \
     src/SilentDream.h \
-    src/CallStack.h
+    src/CallStack.h \
+    src/include/SilentDream/Util.h

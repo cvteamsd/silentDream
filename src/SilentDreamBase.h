@@ -16,6 +16,7 @@ public:
     virtual int destroy();
     virtual int exec() = 0;
 
+
 protected:
     Loop* mLoop;
 

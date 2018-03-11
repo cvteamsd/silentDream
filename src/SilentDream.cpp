@@ -26,7 +26,7 @@ SilentDream::~SilentDream()
 
 }
 
-int SilentDream::exec()
+int SilentDream::init()
 {
     if (daemonize() < 0) {
         return -1;
@@ -36,38 +36,48 @@ int SilentDream::exec()
         return -1;
     }
 
-    LOGV("daemon ready to run...");
-    for (;;) {
+    SilentDreamBase::init();
 
-        sleep(1);
-    }
+    LOGI("silentdream daemon start...");
+    LOGI("RootDir:%s", getRootDir());
+    return 0;
+}
 
+int SilentDream::exec()
+{
+    mLoop->run();
+
+    return 0;
+}
+
+int SilentDream::destroy()
+{
+    return 0;
 }
 
 //////////////////////////////////////////////
 int SilentDream::daemonize()
 {
-    umask(0);
-    
+//    umask(0);
+
     int pid;
     if ((pid = fork()) < 0) {
-        LOGE("fork:%s", strerror(errno));
+        PRINT("fork:%s", strerror(errno));
         return -1;
     } else if (pid != 0) {
         exit(0);
     }
 
-    setsid();
+    if (setsid() < 0) {
+        LOGV("setsid failed:%s",strerror(errno));
+        return -1;
+    }
+
     if ((pid = fork()) < 0) {
         LOGE("fork:%s", strerror(errno));
         return -1;
     } else if (pid != 0) {
         exit(0);
-    }
-
-    if (chdir("/") < 0) {
-        LOGE("chdir:%s", strerror(errno));
-        return -1;
     }
 
     return 0;
@@ -77,7 +87,11 @@ int SilentDream::checkRunning()
 {
     int fd;
 
-    if ((fd = open("/var/run/silentdream.pid", O_RDWR|O_CREAT, 0644)) < 0) {
+    if (ensureDirectoryExist("run") < 0) {
+        return -1;
+    }
+
+    if ((fd = open("run/silentdream.pid", O_RDWR|O_CREAT, 0644)) < 0) {
         LOGE("create pid file failed:%s", strerror(errno));
         return -1;
     }

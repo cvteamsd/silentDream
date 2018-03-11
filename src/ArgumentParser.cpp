@@ -2,7 +2,8 @@
 
 ArgumentParser::ArgumentParser(int argc, char **argv)
 {
-
+    this->argc = argc;
+    this->argv = argv;
 }
 
 int ArgumentParser::initCheck()
@@ -17,6 +18,9 @@ int ArgumentParser::parse()
 
 RunMode ArgumentParser::getRunMode() const
 {
-//    return DAEMON;
-    return CLIENT;
+    if (argc > 1) {
+        return CLIENT;
+    } else {
+        return DAEMON;
+    }
 }

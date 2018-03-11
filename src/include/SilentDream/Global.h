@@ -9,11 +9,20 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
+#include <iostream>
+#include <sstream>
+#include <string>
+
+#include "Util.h"
 
 enum RunMode {
     DAEMON,
     CLIENT,
 };
+
+#ifndef MAX_PATH
+#define MAX_PATH  260
+#endif
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(*(a)))
 
