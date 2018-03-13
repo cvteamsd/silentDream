@@ -41,7 +41,7 @@ void Loop::run()
 
         for (int i = 0; i < numFdReady; ++i) {
             Poll* poll = (Poll*)mReadyEvents[i].data.ptr;
-            int status = -bool(mReadyEvents[i].events & EPOLLERR);
+            int status = -bool(mReadyEvents[i].events & (EPOLLERR|EPOLLHUP));
             auto it = mCallbacks.find(poll->fd());
             if (it != mCallbacks.end()) {
                 it->second(poll, status, mReadyEvents[i].events);

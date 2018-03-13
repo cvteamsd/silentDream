@@ -58,7 +58,6 @@ bool isDaemonRunning()
     int fd;
 
     if ((fd = open("run/silentdream.pid", O_RDWR)) < 0) {
-        LOGE("open pid file failed:%s", strerror(errno));
         return false;
     }
 

@@ -43,7 +43,6 @@ int SilentDreamClient::exec()
         LOGI("hello count: %d", count);
         if (count == 10) {
             timer->loop()->requestExit();
-            *((int*)10) = 1;
         }
     }, 1000, 1000);
 

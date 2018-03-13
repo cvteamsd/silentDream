@@ -33,7 +33,6 @@ int Socket::initAddress(std::string serverAddr)
     }
 
     std::shared_ptr<addrinfo> _(addr, [](struct addrinfo* p) {
-        LOGV("freeaddrinfo");
         ::freeaddrinfo(p);
     });
 
@@ -95,16 +94,16 @@ int Socket::connect()
     int err = ::connect(mSockFd, (struct sockaddr*)&mServerAddr, mServerAddrLen);
     if (err == 0) {
         LOGI("connect success!");
-    } else if (errno == EINPROGRESS) {
-        mPoll->start(cbConnect, EPOLLIN | EPOLLOUT);
     } else {
-        LOGI("connect failed!");
-        return -1;
+        if (errno != EINPROGRESS) {
+            LOGI("connect failed:%s", strerror(errno));
+            return -1;
+        }
+        mPoll->start(cbConnect, EPOLLOUT);
     }
 
     return 0;
 }
-
 
 void Socket::cbAccept(Poll *p, int status, int event)
 {
@@ -124,10 +123,10 @@ int Socket::onAccept()
 {
     int clientSock;
     struct sockaddr client;
-    socklen_t sockLen;
-
+    socklen_t sockLen = sizeof(struct sockaddr);
     clientSock = ::accept(mSockFd, &client, &sockLen);
     if (clientSock < 0) {
+        assert (errno!=EAGAIN && errno!=EWOULDBLOCK);
         LOGE("accept failed:%s", strerror(errno));
         return -1;
     }
@@ -144,10 +143,6 @@ int Socket::onAccept()
 
 void Socket::cbConnect(Poll *p, int status, int event)
 {
-    int ret;
-    int err;
-    socklen_t len = sizeof(err);
-
     if (status < 0) {
         LOGE("cbConnect error!");
         p->stop();
@@ -155,20 +150,19 @@ void Socket::cbConnect(Poll *p, int status, int event)
     }
 
     Socket* s = static_cast<Socket*>(p->userData());
-
-    if (event & EPOLLIN) {
-        ret = getsockopt(p->fd(), SOL_SOCKET, SO_ERROR, &err, &len);
-        if (err == 0) {
-            LOGI("connect success!");
-            p->stop();
-        } else {
-            LOGE("connect failed:%s", strerror(err));
-            p->stop();
-        }
-    }
+    int ret;
+    int err;
+    socklen_t len = sizeof(err);
 
     if (event & EPOLLOUT) {
-        LOGI("connect success!");
+        ret = getsockopt(p->fd(), SOL_SOCKET, SO_ERROR, &err, &len);
+        assert(ret == 0);
+        if (err == 0) {
+            LOGI("cbConnect success!");
+        } else {
+            LOGE("cbConnect failed:%s", strerror(err));
+        }
+
         p->stop();
     }
 }
