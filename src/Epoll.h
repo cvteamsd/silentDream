@@ -22,6 +22,7 @@ class Poll;
 class Async;
 
 using Callback = void(*)(Poll*, int, int);
+using CbLoopExit = void(*)(void*);
 
 struct Timepoint {
     std::function<void(Timer *)> cb;
@@ -47,7 +48,7 @@ public:
 
     int add(Poll*, Callback cb, epoll_event *event);
     int remove(Poll*);
-    int change(Poll*, epoll_event *newEvent);
+    int change(Poll*, Callback cb, epoll_event *newEvent);
 
     //called by other threads
     void sendRequest(std::function<void(void*)> cb, void *data);
@@ -74,9 +75,10 @@ private:
 class Loop::Object
 {
 public:
-    Object(Loop* loop, void* userData)
+    Object(Loop* loop, void* userData, void (*cbLoopExit)(void* p))
         : mLoop(loop)
         , mUserData(userData)
+        , mCbLoopExit(cbLoopExit)
     {
     }
 
@@ -84,6 +86,8 @@ public:
 
     virtual void stop() {}
     virtual void onLoopExit() {
+        if (mCbLoopExit)
+            mCbLoopExit(mUserData);
         stop();
     }
 
@@ -93,13 +97,14 @@ public:
 protected:
     Loop* mLoop;
     void *mUserData;
+    void (*mCbLoopExit)(void *p);
 };
 
 class Timer : public Loop::Object
 {
 public:
-    Timer(Loop* loop, void* userData)
-        : Object(loop, userData) { }
+    Timer(Loop* loop, void* userData, CbLoopExit cbLoopExit = nullptr)
+        : Object(loop, userData, cbLoopExit) { }
     virtual ~Timer() { }
 
     void start(std::function<void(Timer*)> cb, int timeout, int repeat = 0);
@@ -109,8 +114,8 @@ public:
 class Poll : public Loop::Object
 {
 public:
-    Poll(Loop *loop, int fd, void* userData)
-        : Object(loop, userData)
+    Poll(Loop *loop, int fd, void* userData, CbLoopExit cbLoopExit = nullptr)
+        : Object(loop, userData, cbLoopExit)
         , mFd(fd) { }
 
     //caller should close fd himself
@@ -120,9 +125,9 @@ public:
         }
     }
 
-    void start(Callback cb, int events);
+    void start(int events, Callback cb);
     void stop();
-    void change(int events);
+    void change(int events, Callback cb = nullptr);
     virtual void startTimeout(void (*cb)(Timer*), int timeout);
     void cancelTimeout();
     int fd() const { return mFd; }
@@ -134,8 +139,8 @@ protected:
 
 class Async : public Poll {
 public:
-    Async(Loop* loop, void* userData = nullptr)
-        : Poll(loop, ::eventfd(0, EFD_CLOEXEC), userData) {
+    Async(Loop* loop, void* userData = nullptr, CbLoopExit cbLoopExit = nullptr)
+        : Poll(loop, ::eventfd(0, EFD_CLOEXEC), userData, cbLoopExit) {
     }
 
     ~Async() {

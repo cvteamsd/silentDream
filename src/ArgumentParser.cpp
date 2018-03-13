@@ -19,8 +19,8 @@ int ArgumentParser::parse()
 RunMode ArgumentParser::getRunMode() const
 {
     if (argc > 1) {
-        return CLIENT;
+        return RUN_MODE_CLIENT;
     } else {
-        return DAEMON;
+        return RUN_MODE_DAEMON;
     }
 }

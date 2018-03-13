@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     }
 
     RunMode runMode = argParser.getRunMode();
-    if (runMode == DAEMON && isDaemonRunning()) {
+    if (runMode == RUN_MODE_DAEMON && isDaemonRunning()) {
         PRINT("already running, exit!");
         return -1;
     }
@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     Log::initLogMode(runMode);
 
     std::shared_ptr<SilentDreamBase> s;
-    if (runMode == CLIENT) {
+    if (runMode == RUN_MODE_CLIENT) {
         s.reset(new SilentDreamClient(argParser));
     } else {
         s.reset(new SilentDream());

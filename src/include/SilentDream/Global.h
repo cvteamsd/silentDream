@@ -16,8 +16,8 @@
 #include "Util.h"
 
 enum RunMode {
-    DAEMON,
-    CLIENT,
+    RUN_MODE_DAEMON,
+    RUN_MODE_CLIENT,
 };
 
 #ifndef MAX_PATH

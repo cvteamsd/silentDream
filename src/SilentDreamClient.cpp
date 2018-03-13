@@ -18,6 +18,7 @@ int SilentDreamClient::init()
     SilentDreamBase::init();
 
     mSocket = new Socket(mLoop);
+    mSocket->setClientHandler(this);
     if (mSocket->initAddress("localhost") < 0) {
         return -1;
     }
@@ -40,9 +41,9 @@ int SilentDreamClient::exec()
         static int count = 0;
 
         ++count;
-        LOGI("hello count: %d", count);
+//        LOGI("hello count: %d", count);
         if (count == 10) {
-            timer->loop()->requestExit();
+//            timer->loop()->requestExit();
         }
     }, 1000, 1000);
 
@@ -55,3 +56,24 @@ int SilentDreamClient::destroy()
 {
     return 0;
 }
+
+
+//////////////////////////////////////////////////
+void SilentDreamClient::onConnected()
+{
+//    char data[] = "hello";
+    const char *data = "hello";
+
+    mSocket->write<CLIENT>(data, 5);
+
+    mLoop->requestExit();
+}
+
+
+
+
+
+
+
+
+

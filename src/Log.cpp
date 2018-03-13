@@ -20,7 +20,7 @@ int Log::initLogMode(RunMode runMode)
         return -1;
     }
 
-    if (runMode == DAEMON) {
+    if (runMode == RUN_MODE_DAEMON) {
         FILE* fp_log = fopen("log/silentdream.log", "a");
         if (fp_log == NULL) {
             PRINT("open log file failed:%s\n", strerror(errno));

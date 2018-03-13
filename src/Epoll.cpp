@@ -136,8 +136,13 @@ int Loop::remove(Poll* p) {
     return ret;
 }
 
-int Loop::change(Poll* p, epoll_event *newEvent) {
-    return epoll_ctl(mFd, EPOLL_CTL_MOD, p->fd(), newEvent);
+int Loop::change(Poll* p, Callback cb, epoll_event *newEvent) {
+    int ret = epoll_ctl(mFd, EPOLL_CTL_MOD, p->fd(), newEvent);
+    if (ret == 0) {
+        mCallbacks[p->fd()] = cb;
+    }
+
+    return ret;
 }
 
 void Loop::sendRequest(std::function<void(void *)> cb, void *data)
@@ -184,7 +189,7 @@ void Timer::stop()
 }
 
 //////////////////////////////////
-void Poll::start(Callback cb, int events)
+void Poll::start(int events, Callback cb)
 {
     epoll_event event;
     event.events = events;
@@ -198,12 +203,12 @@ void Poll::stop()
     mLoop->remove(this);
 }
 
-void Poll::change(int events)
+void Poll::change(int events, Callback cb)
 {
     epoll_event event;
     event.events = events;
     event.data.ptr = this;
-    mLoop->change(this, &event);
+    mLoop->change(this, cb, &event);
 }
 
 void Poll::startTimeout(void (*cb)(Timer *), int timeout)
@@ -224,12 +229,12 @@ void Async::start(std::function<void (Async *)> cb)
 {
     this->cb = cb;
 
-    Poll::start([](Poll* p, int, int) {
+    Poll::start(EPOLLIN, [](Poll* p, int, int) {
         uint64_t val;
         if (::read(p->fd(), &val, 8) == 8) {
             ((Async*)p)->cb((Async*)p);
         }
-    }, EPOLLIN);
+    });
 }
 
 void Async::notify()
