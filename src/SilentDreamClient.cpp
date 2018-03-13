@@ -1,5 +1,6 @@
 #include "SilentDreamClient.h"
 #include "Epoll.h"
+#include "Socket.h"
 
 SilentDreamClient::SilentDreamClient(ArgumentParser &argParser)
         : mArgParser(argParser)
@@ -10,6 +11,26 @@ SilentDreamClient::SilentDreamClient(ArgumentParser &argParser)
 SilentDreamClient::~SilentDreamClient()
 {
 
+}
+
+int SilentDreamClient::init()
+{
+    SilentDreamBase::init();
+
+    mSocket = new Socket(mLoop);
+    if (mSocket->initAddress("localhost") < 0) {
+        return -1;
+    }
+
+    if (mSocket->createSocket() < 0) {
+        return -1;
+    }
+
+    if (mSocket->connect() < 0) {
+        return -1;
+    }
+
+    return 0;
 }
 
 int SilentDreamClient::exec()
@@ -28,5 +49,10 @@ int SilentDreamClient::exec()
 
     mLoop->run();
 
+    return 0;
+}
+
+int SilentDreamClient::destroy()
+{
     return 0;
 }

@@ -2,6 +2,7 @@
 #define SOCKET_H
 
 #include <sys/socket.h>
+#include <netinet/in.h>
 
 #include <SilentDream/Log.h>
 #include <string>
@@ -13,8 +14,9 @@ public:
     Socket(Loop* loop);
     ~Socket();
 
-    int initSocket(std::string address);
+    int createSocket();
     int initServer();
+    int initAddress(std::string address);
     int connect();
 
     int start();
@@ -25,12 +27,15 @@ public:
     static void ioHandler(Poll* p, int status, int event);
 
 private:
+    int onAccept();
+
+
     int mDomain;
     int mType;
     int mProtocol;
     int mSockFd;
     bool mIsServer;
-    struct sockaddr mServerAddr;
+    struct sockaddr_in mServerAddr = {0};
     socklen_t mServerAddrLen;
     Poll* mPoll;
     Loop* mLoop;

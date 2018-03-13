@@ -6,6 +6,7 @@ Loop::Object::~Object() {}
 Loop::Loop()
 {
     mFd = epoll_create(1024);
+    LOGI("epoll fd:%d", mFd);
     mTimePoint = std::chrono::system_clock::now();
     mHandler.reset(new Async(this));
 
@@ -130,7 +131,7 @@ int Loop::remove(Poll* p) {
             mObjects.erase(it);
         }
     }
-    assert(ret == 0);
+//    assert(ret == 0);
 
     return ret;
 }

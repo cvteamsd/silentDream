@@ -14,6 +14,7 @@
 #include "SilentDream.h"
 #include "ArgumentParser.h"
 #include "Epoll.h"
+#include "Socket.h"
 
 
 SilentDream::SilentDream()
@@ -28,9 +29,9 @@ SilentDream::~SilentDream()
 
 int SilentDream::init()
 {
-    if (daemonize() < 0) {
-        return -1;
-    }
+//    if (daemonize() < 0) {
+//        return -1;
+//    }
 
     if (checkRunning() != 0) {
         return -1;
@@ -40,6 +41,24 @@ int SilentDream::init()
 
     LOGI("silentdream daemon start...");
     LOGI("RootDir:%s", getRootDir());
+
+
+    mSocket = new Socket(mLoop);
+    if (mSocket->initAddress("0.0.0.0") < 0) {
+        return -1;
+    }
+
+    if (mSocket->createSocket() < 0) {
+        return -1;
+    }
+
+    if (mSocket->initServer() < 0) {
+        return -1;
+    }
+
+
+
+
     return 0;
 }
 

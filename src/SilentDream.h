@@ -3,6 +3,8 @@
 
 #include "SilentDreamBase.h"
 
+class Socket;
+
 class SilentDream  : public SilentDreamBase
 {
 public:
@@ -20,6 +22,9 @@ private:
 private:
     int daemonize();
     int checkRunning(); 
+
+
+    Socket* mSocket = nullptr;
 };
 
 
