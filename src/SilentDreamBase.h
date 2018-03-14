@@ -10,11 +10,11 @@ class SilentDreamBase
 {
 public:
     explicit SilentDreamBase();
-    virtual ~SilentDreamBase();
+    virtual ~SilentDreamBase() = 0;
 
     virtual int init();
     virtual int destroy();
-    virtual int exec() = 0;
+    virtual int exec();
 
 
 protected:

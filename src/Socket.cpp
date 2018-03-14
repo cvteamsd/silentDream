@@ -9,47 +9,16 @@
 Socket::Socket(Loop* loop)
     : mLoop(loop)
 {
+    memset(&mSockAddr, 0, sizeof(struct sockaddr_in));
 }
 
 Socket::~Socket()
 {
-
+    mPoll->stop();
+    delete mPoll;
+    ::shutdown(mSockFd, SHUT_RDWR);
+    ::close(mSockFd);
 }
-
-void Socket::setClientHandler(SocketClientHandler *clientHandler)
-{
-    mClientHandler = clientHandler;
-}
-
-template <bool isServer = SERVER>
-ssize_t Socket::read(uint8_t* buf, size_t len)
-{
-    ssize_t err = 0;
-
-    if (isServer) {
-
-    } else {
-        ::read(mSockFd, buf, len);
-
-    }
-
-    return err;
-}
-
-template <bool isServer = SERVER>
-ssize_t Socket::write(const void *buf, size_t len)
-{
-    ssize_t err = 0;
-
-    if (isServer) {
-
-    } else {
-        err = ::write(mSockFd, buf, len);
-    }
-
-    return err;
-}
-
 
 int Socket::initAddress(std::string serverAddr)
 {
@@ -73,8 +42,8 @@ int Socket::initAddress(std::string serverAddr)
 
     struct sockaddr_in* addr_in = (struct sockaddr_in*)addr->ai_addr;
     addr_in->sin_port = htons(SERV_PORT);
-    mServerAddr = *addr_in;
-    mServerAddrLen = addr->ai_addrlen;
+    mSockAddr = *addr_in;
+    mSockAddrLen = addr->ai_addrlen;
     mDomain = AF_INET;
     mType = SOCK_STREAM;
     mProtocol = IPPROTO_TCP;
@@ -103,9 +72,9 @@ int Socket::createSocket()
 
 int Socket::initServer()
 {
-    LOGI("server:%s:%d", inet_ntoa(mServerAddr.sin_addr), ntohs(mServerAddr.sin_port));
+    LOGI("server:%s:%d", inet_ntoa(mSockAddr.sin_addr), ntohs(mSockAddr.sin_port));
 
-    int err = ::bind(mSockFd, (struct sockaddr*)&mServerAddr, sizeof(struct sockaddr));
+    int err = ::bind(mSockFd, (struct sockaddr*)&mSockAddr, sizeof(struct sockaddr));
     if (err < 0) {
         LOGE("bind:%s", strerror(errno));
         return -1;
@@ -124,9 +93,9 @@ int Socket::initServer()
 
 int Socket::connect()
 {
-    LOGI("connect:%s:%d", inet_ntoa(mServerAddr.sin_addr), ntohs(mServerAddr.sin_port));
+    LOGI("connect:%s:%d", inet_ntoa(mSockAddr.sin_addr), ntohs(mSockAddr.sin_port));
 
-    int err = ::connect(mSockFd, (struct sockaddr*)&mServerAddr, mServerAddrLen);
+    int err = ::connect(mSockFd, (struct sockaddr*)&mSockAddr, mSockAddrLen);
     if (err == 0) {
         LOGI("connect success!");
     } else {
@@ -140,15 +109,46 @@ int Socket::connect()
     return 0;
 }
 
+int Socket::iniSocket(Poll *poll, struct sockaddr_in *addr, socklen_t addrLen)
+{
+    mDomain = addr->sin_family;
+    mType = SOCK_STREAM;
+    mProtocol = IPPROTO_TCP;
+    mSockAddr = *addr;
+    mSockAddrLen = addrLen;
+    mPoll = poll;
+    mSockFd = poll->fd();
+
+    return 0;
+}
+
+void Socket::setClientHandler(SocketClientHandler *clientHandler)
+{
+    mClientHandler = clientHandler;
+}
+
+void Socket::setServerHandler(SocketServerHandler *serverHandler)
+{
+    mServerHandler = serverHandler;
+}
+
+ssize_t Socket::write(const void *buf, size_t len)
+{
+    ssize_t ret = 0;
+
+    ret = ::write(mSockFd, buf, len);
+
+    return ret;
+}
+
 ////////////////////////////////////////////////////////
 void Socket::cbAccept(Poll *p, int status, int event)
 {
-    if (status < 0) {
-        LOGE("accept error!");
-        return;
-    }
-
     Socket* s = static_cast<Socket*>(p->userData());
+
+    if (status < 0) {
+        event |= EPOLLIN;
+    }
 
     if (event & EPOLLIN) {
         s->onAccept();
@@ -170,102 +170,93 @@ int Socket::onAccept()
     struct sockaddr_in* client_in = (struct sockaddr_in*)&client;
     LOGI("client:%s:%d", inet_ntoa(client_in->sin_addr), ntohs(client_in->sin_port));
 
-    Poll* poll = new Poll(mLoop, clientSock, this);
-    poll->start(EPOLLIN, cbServer);
-    mClients.insert(poll);
+    if (mServerHandler) {
+        mServerHandler->onAccepted(clientSock, client_in, sockLen);
+    }
 
     return 0;
 }
 
-
 void Socket::cbConnect(Poll *p, int status, int event)
 {
+    Socket* s = static_cast<Socket*>(p->userData());
+
     if (status < 0) {
-        LOGE("cbConnect error:%s %s", event&EPOLLERR?"EPOLLERR":"", event&EPOLLHUP?"EPOLLHUP":"");
-        p->stop();
-        return;
+        event |= EPOLLOUT;
     }
 
-    Socket* s = static_cast<Socket*>(p->userData());
     int ret;
     int err;
+    bool fail = false;
     socklen_t len = sizeof(err);
-
     if (event & EPOLLOUT) {
         ret = getsockopt(p->fd(), SOL_SOCKET, SO_ERROR, &err, &len);
-        assert(ret == 0);
-        if (err == 0) {
-            LOGI("cbConnect success!");
-            if (s->mClientHandler) {
-                s->mClientHandler->onConnected();
-            }
+        if (ret < 0) {
+            LOGE("getsockopt failed:%s", strerror(errno));
+            fail = true;
         } else {
-            LOGE("cbConnect failed:%s", strerror(err));
+            if (err != 0) {
+                LOGE("cbConnect failed:%s", strerror(err));
+                fail = true;
+            } else {
+                LOGI("cbConnect success!");
+            }
         }
 
-        p->change(EPOLLIN, cbClient);
-    }
-}
-
-void Socket::cbServer(Poll *p, int status, int event)
-{
-    Socket* s = static_cast<Socket*>(p->userData());
-    int err;
-    uint8_t recvBuf[1024];
-
-    if (status < 0) {
-        event |= EPOLLIN|EPOLLOUT;
-    }
-
-    if (event & EPOLLIN) {
-        memset(recvBuf, 0, sizeof(recvBuf));
-        err = ::recv(p->fd(), recvBuf, sizeof(recvBuf), 0);
-        if (err <= 0) {
-            if (err < 0)
-                LOGE("cbServer error:%s", strerror(errno));
-
+        if (!fail) {
+            p->change(EPOLLIN, ioHandler<CLIENT>);
+            s->mClientHandler->onConnected();
+        } else {
             p->stop();
-            s->mClients.erase(p);
-            ::close(p->fd());
-            delete p;
-
-            return;
+            s->mClientHandler->onError(Socket::ERROR_CONNECT);
         }
-        LOGI("%s", recvBuf);
     }
 }
 
-void Socket::cbClient(Poll *p, int status, int event)
-{
-    Socket* s = static_cast<Socket*>(p->userData());
-    int err;
-    uint8_t recvBuf[1024];
-
-    if (status < 0) {
-        event |= EPOLLIN|EPOLLOUT;
-    }
-
-    if (event & EPOLLIN) {
-        memset(recvBuf, 0, sizeof(recvBuf));
-        err = ::recv(p->fd(), recvBuf, sizeof(recvBuf), 0);
-        if (err <= 0) {
-            LOGE("cbServer error:%s", strerror(errno));
-
-            p->stop();
-            ::close(p->fd());
-            delete p;
-        }
-        LOGI("%s", recvBuf);
-    }
-
-}
-
+template <bool isServer>
 void Socket::ioHandler(Poll *p, int status, int event)
 {
+    Socket* s = static_cast<Socket*>(p->userData());
+    bool fail = false;
+    int len;
+    uint8_t recvBuf[1024];
 
+    if (status < 0) {
+        event |= EPOLLIN|EPOLLOUT;
+    }
+
+    if (event & EPOLLIN) {
+        memset(recvBuf, 0, sizeof(recvBuf));
+        len = ::recv(p->fd(), recvBuf, sizeof(recvBuf), 0);
+        if (len <= 0) {
+            if (len < 0)
+                LOGE("cbServer error:%s", strerror(errno));
+           fail = true;
+           p->change(p->events()&~EPOLLIN);
+        }
+
+        if (isServer) {
+            if (!fail) {
+                s->mServerHandler->onData(recvBuf, len);
+            } else {
+                s->mServerHandler->onError(ERROR_RECV);
+            }
+        } else {
+            if (!fail) {
+                s->mClientHandler->onData(recvBuf, len);
+            } else {
+                s->mClientHandler->onError(ERROR_RECV);
+            }
+        }
+    }
+
+    if (event & EPOLLOUT) {
+
+    }
 }
 
+template void Socket::ioHandler<Socket::SERVER>(Poll*, int, int);
+template void Socket::ioHandler<Socket::CLIENT>(Poll*, int, int);
 
-
-template ssize_t Socket::write<CLIENT>(const void*, size_t);
-
+SocketClientHandler::~SocketClientHandler() {}
+SocketServerHandler::~SocketServerHandler() {}

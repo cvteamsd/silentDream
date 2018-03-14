@@ -131,10 +131,12 @@ public:
     virtual void startTimeout(void (*cb)(Timer*), int timeout);
     void cancelTimeout();
     int fd() const { return mFd; }
+    int events() const {return mEvents;}
 
 protected:
     int mFd = -1;
     Timer* mTimer = nullptr;
+    int mEvents = 0;
 };
 
 class Async : public Poll {

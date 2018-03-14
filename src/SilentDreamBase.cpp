@@ -23,6 +23,11 @@ int SilentDreamBase::init()
     return 0;
 }
 
+int SilentDreamBase::exec()
+{
+    mLoop->run();
+}
+
 int SilentDreamBase::destroy()
 {
     return 0;

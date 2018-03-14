@@ -6,7 +6,6 @@ Loop::Object::~Object() {}
 Loop::Loop()
 {
     mFd = epoll_create(1024);
-    LOGI("epoll fd:%d", mFd);
     mTimePoint = std::chrono::system_clock::now();
     mHandler.reset(new Async(this));
 
@@ -184,7 +183,7 @@ void Timer::start(std::function<void (Timer *)> cb, int timeout, int repeat)
 
 void Timer::stop()
 {
-    LOGV("stop timer:%p", this);
+//    LOGV("stop timer:%p", this);
     mLoop->removeTimer(this);
 }
 
@@ -195,11 +194,13 @@ void Poll::start(int events, Callback cb)
     event.events = events;
     event.data.ptr = this;
     mLoop->add(this, cb, &event);
+
+    mEvents = events;
 }
 
 void Poll::stop()
 {
-    LOGV("stop poll:%p", this);
+//    LOGV("stop poll:%p", this);
     mLoop->remove(this);
 }
 
@@ -209,6 +210,8 @@ void Poll::change(int events, Callback cb)
     event.events = events;
     event.data.ptr = this;
     mLoop->change(this, cb, &event);
+
+    mEvents = events;
 }
 
 void Poll::startTimeout(void (*cb)(Timer *), int timeout)

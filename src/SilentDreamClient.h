@@ -14,18 +14,15 @@ public:
     virtual ~SilentDreamClient();
 
     virtual int init();
-    virtual int exec();
     virtual int destroy();
 
     virtual void onConnected();
+    virtual void onData(const void* buf, size_t len);
+    virtual void onError(Socket::ErrorCode);
 
 private:
     ArgumentParser& mArgParser;
-
-
     Socket* mSocket = nullptr;
-
-
 
     DISALLOW_EVIL_CONSTRUCTORS(SilentDreamClient);
 };

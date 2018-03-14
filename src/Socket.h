@@ -8,72 +8,77 @@
 #include <string>
 #include "Epoll.h"
 
-enum {
-    CLIENT,
-    SERVER
-};
-
-class SocketClientHandler
-{
-public:
-    virtual ~SocketClientHandler() {}
-    virtual void onConnected() = 0;
-    virtual void onData(const void* buf, size_t len) = 0;
-};
-
-class SocketServerHandler
-{
-public:
-    virtual ~SocketServerHandler() {}
-    virtual void onAccepted() = 0;
-    virtual void onData(const void* buf, size_t len) = 0;
-};
-
+class SocketClientHandler;
+class SocketServerHandler;
 
 class Socket
 {
 public:
+    enum {
+        CLIENT,
+        SERVER,
+    };
+
+    enum ErrorCode {
+        ERROR_UNKNOWN = 1000,
+        ERROR_CONNECT,
+        ERROR_RECV,
+        ERROR_SEND,
+    };
+
     Socket(Loop* loop);
     ~Socket();
 
+    int initAddress(std::string address);
     int createSocket();
     int initServer();
-    int initAddress(std::string address);
     int connect();
+    int iniSocket(Poll*poll, struct sockaddr_in* addr, socklen_t addrLen);
 
-    int start();
-    int stop();
-
-    template <bool isServer = true>
-    ssize_t write(const void* buf, size_t len);
     void setClientHandler(SocketClientHandler* clientHandler);
     void setServerHandler(SocketServerHandler* serverHandler);
 
-    static void cbAccept(Poll* p, int status, int event);
-    static void cbServer(Poll* p, int status, int event);
-    static void cbConnect(Poll* p, int status, int event);
-    static void cbClient(Poll* p, int status, int event);
+    ssize_t write(const void* buf, size_t len);
 
+    static void cbAccept(Poll* p, int status, int event);
+    static void cbConnect(Poll* p, int status, int event);
+    template <bool isServer>
     static void ioHandler(Poll* p, int status, int event);
 
 private:
     int onAccept();
 
+private:
+    int mDomain = AF_INET;
+    int mType = SOCK_STREAM;
+    int mProtocol = IPPROTO_TCP;
+    struct sockaddr_in mSockAddr;
+    socklen_t mSockAddrLen = sizeof(struct sockaddr_in);
 
-    int mDomain;
-    int mType;
-    int mProtocol;
-    int mSockFd;
-    bool mIsServer;
-    struct sockaddr_in mServerAddr = {0};
-    socklen_t mServerAddrLen;
-    Poll* mPoll;
-    Loop* mLoop;
+    int mSockFd = -1;
+    Poll* mPoll = nullptr;
+    Loop* mLoop = nullptr;
 
     SocketClientHandler* mClientHandler = nullptr;
-
-    std::set<Poll*> mClients;
+    SocketServerHandler* mServerHandler = nullptr;
 };
 
+class SocketClientHandler
+{
+public:
+    virtual ~SocketClientHandler() = 0;
+    virtual void onConnected() {}
+    virtual void onData(const void*, size_t) {}
+    virtual void onError(Socket::ErrorCode) = 0;
+};
+
+class SocketServerHandler
+{
+public:
+    virtual ~SocketServerHandler() = 0;
+    virtual void onAccepted(int sockFd, struct sockaddr_in* addr, socklen_t addrLen) {}
+    virtual void onData(const void* buf, size_t len) {}
+    virtual void onError(Socket::ErrorCode) = 0;
+};
 
 #endif // SOCKET_H

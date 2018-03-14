@@ -1,11 +1,13 @@
 #ifndef _SILENT_DREAM_H
 #define _SILENT_DREAM_H
 
+#include <set>
 #include "SilentDreamBase.h"
+#include "Socket.h"
 
-class Socket;
+class SilentDreamWorker;
 
-class SilentDream  : public SilentDreamBase
+class SilentDream  : public SilentDreamBase, public SocketServerHandler
 {
 public:
     SilentDream();
@@ -13,18 +15,20 @@ public:
 
     virtual int init();
     virtual int destroy();
-    virtual int exec();
+
+    virtual void onAccepted(int sockFd, struct sockaddr_in* addr, socklen_t addrLen);
+    virtual void onError(Socket::ErrorCode);
 
 private:
     SilentDream(const SilentDream&);
     SilentDream& operator=(const SilentDream&);
 
-private:
     int daemonize();
     int checkRunning(); 
 
-
+private:
     Socket* mSocket = nullptr;
+    std::set<SilentDreamWorker*> mWorkers;
 };
 
 

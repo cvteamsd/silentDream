@@ -12,6 +12,7 @@
 
 #include <SilentDream/Log.h>
 #include "SilentDream.h"
+#include "SilentDreamWorker.h"
 #include "ArgumentParser.h"
 #include "Epoll.h"
 #include "Socket.h"
@@ -19,19 +20,25 @@
 
 SilentDream::SilentDream()
 {
-
 }
 
 SilentDream::~SilentDream()
 {
+    for (auto &p : mWorkers) {
+        delete p;
+    }
 
+    if (mSocket != nullptr) {
+        delete mSocket;
+        mSocket = nullptr;
+    }
 }
 
 int SilentDream::init()
 {
-//    if (daemonize() < 0) {
-//        return -1;
-//    }
+    if (daemonize() < 0) {
+        return -1;
+    }
 
     if (checkRunning() != 0) {
         return -1;
@@ -44,34 +51,49 @@ int SilentDream::init()
 
 
     mSocket = new Socket(mLoop);
+    mSocket->setServerHandler(this);
     if (mSocket->initAddress("0.0.0.0") < 0) {
         return -1;
     }
-
     if (mSocket->createSocket() < 0) {
         return -1;
     }
-
     if (mSocket->initServer() < 0) {
         return -1;
     }
-
-
-
-
-    return 0;
-}
-
-int SilentDream::exec()
-{
-    mLoop->run();
 
     return 0;
 }
 
 int SilentDream::destroy()
 {
+    const char* pid_file = "run/silentdream.pid";
+
+    if (::access(pid_file, F_OK) == 0) {
+        if (::unlink(pid_file) < 0) {
+            LOGW("delete pid file:%s failed:%s", pid_file, strerror(errno));
+        }
+    }
+
     return 0;
+}
+
+void SilentDream::onAccepted(int sockFd, struct sockaddr_in *addr, socklen_t addrLen)
+{
+    Socket* s = new Socket(mLoop);
+    Poll* poll = new Poll(mLoop, sockFd, s);
+    s->iniSocket(poll, addr, addrLen);
+
+    SilentDreamWorker* worker = new SilentDreamWorker(mLoop, s);
+    s->setServerHandler(worker);
+
+    mWorkers.insert(worker);
+    poll->start(EPOLLIN, Socket::ioHandler<Socket::SERVER>);
+}
+
+void SilentDream::onError(Socket::ErrorCode err)
+{
+
 }
 
 //////////////////////////////////////////////
@@ -81,14 +103,14 @@ int SilentDream::daemonize()
 
     int pid;
     if ((pid = fork()) < 0) {
-        PRINT("fork:%s", strerror(errno));
+        LOGE("fork:%s", strerror(errno));
         return -1;
     } else if (pid != 0) {
         exit(0);
     }
 
     if (setsid() < 0) {
-        LOGV("setsid failed:%s",strerror(errno));
+        LOGE("setsid failed:%s",strerror(errno));
         return -1;
     }
 

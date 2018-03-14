@@ -10,7 +10,10 @@ SilentDreamClient::SilentDreamClient(ArgumentParser &argParser)
 
 SilentDreamClient::~SilentDreamClient()
 {
-
+    if (mSocket != nullptr) {
+        delete mSocket;
+        mSocket = nullptr;
+    }
 }
 
 int SilentDreamClient::init()
@@ -22,32 +25,12 @@ int SilentDreamClient::init()
     if (mSocket->initAddress("localhost") < 0) {
         return -1;
     }
-
     if (mSocket->createSocket() < 0) {
         return -1;
     }
-
     if (mSocket->connect() < 0) {
         return -1;
     }
-
-    return 0;
-}
-
-int SilentDreamClient::exec()
-{
-    std::shared_ptr<Timer> timer(new Timer(mLoop, this));
-    timer->start([](Timer* timer) {
-        static int count = 0;
-
-        ++count;
-//        LOGI("hello count: %d", count);
-        if (count == 10) {
-//            timer->loop()->requestExit();
-        }
-    }, 1000, 1000);
-
-    mLoop->run();
 
     return 0;
 }
@@ -64,11 +47,21 @@ void SilentDreamClient::onConnected()
 //    char data[] = "hello";
     const char *data = "hello";
 
-    mSocket->write<CLIENT>(data, 5);
+    mSocket->write(data, 5);
+
+}
+
+void SilentDreamClient::onData(const void *buf, size_t len)
+{
+    LOGI("client received:%s", (const char*)buf);
 
     mLoop->requestExit();
 }
 
+void SilentDreamClient::onError(Socket::ErrorCode err)
+{
+
+}
 
 
 
