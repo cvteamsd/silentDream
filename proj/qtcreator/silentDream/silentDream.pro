@@ -22,7 +22,10 @@ SOURCES += \
     src/SignalHandler.cpp \
     src/SilentDreamBase.cpp \
     src/CallStack.cpp \
-    src/Util.cpp
+    src/Util.cpp \
+    src/PluginManager.cpp \
+    src/PluginBase.cpp \
+    src/HelloApp.cpp
 
 HEADERS += \
     src/ArgumentParser.h \
@@ -36,4 +39,11 @@ HEADERS += \
     src/SilentDreamBase.h \
     src/SilentDream.h \
     src/CallStack.h \
-    src/include/SilentDream/Util.h
+    src/include/SilentDream/Util.h \
+    src/PluginManager.h \
+    src/AppInterface.h \
+    src/HelloApp.h \
+    src/FactoryDefine.h \
+    src/prepost.h \
+    src/PluginBase.h \
+    src/FactoryBase.h

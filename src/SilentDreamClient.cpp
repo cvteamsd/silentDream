@@ -2,6 +2,8 @@
 #include "Epoll.h"
 #include "Socket.h"
 
+#include "HelloApp.h"
+
 SilentDreamClient::SilentDreamClient(ArgumentParser &argParser)
         : mArgParser(argParser)
 {
@@ -31,6 +33,12 @@ int SilentDreamClient::init()
     if (mSocket->connect() < 0) {
         return -1;
     }
+
+    //test
+    bool ret = HelloApp::registerPlugin(HelloApp::name(), HelloApp::creator);
+    LOGI("ret = %d", ret);
+    AppInterface* hello = AppFactory::instance()->create(HelloApp::name());
+
 
     return 0;
 }
