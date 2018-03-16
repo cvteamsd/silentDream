@@ -12,6 +12,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cctype>
+#include <algorithm>
 
 #include "Util.h"
 

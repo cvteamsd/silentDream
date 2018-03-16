@@ -24,7 +24,6 @@ SOURCES += \
     src/CallStack.cpp \
     src/Util.cpp \
     src/PluginManager.cpp \
-    src/PluginBase.cpp \
     src/HelloApp.cpp
 
 HEADERS += \

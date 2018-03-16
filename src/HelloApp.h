@@ -6,16 +6,19 @@
 class HelloApp : public AppInterface
 {
 public:
+    PLUGIN_META(App, Hello)
+
     int start();
     int stop();
-    static std::string name() {
-        return "app.hello";
-    }
 
-    static AppInterface* creator() {
-        LOGI("new HelloApp");
-        return new HelloApp();
-    }
+//    static std::string name() {
+//        return "app.hello";
+//    }
+
+//    static AppInterface* creator() {
+//        LOGI("new HelloApp");
+//        return new HelloApp();
+//    }
 
 private:
     HelloApp();

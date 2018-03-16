@@ -4,13 +4,14 @@
 #include <string>
 #include <map>
 #include <algorithm>
+#include <SilentDream/Global.h>
 
-template <typename T>
-class FactoryBase
+template <typename InterfaceFactory, typename Interface>
+class FactoryBase : public Singleton<InterfaceFactory>
 {
 public:
     FactoryBase() {}
-    typedef T* (*Creator)();
+    typedef Interface* (*Creator)();
 
     bool registerPlugin(std::string name, Creator c) {
         LOGI("register name:%s", name.c_str());
@@ -18,7 +19,7 @@ public:
         return it.second;
     }
 
-    T* create(std::string name) {
+    Interface* create(std::string name) {
         auto it = mCreators.find(name);
         if (it != mCreators.end()) {
             return it->second();
@@ -29,5 +30,11 @@ public:
 private:
     std::map<std::string, Creator> mCreators;
 };
+
+#define DECLARE_FACTORY(Type) class Type##Factory
+
+#define DEFINE_FACTORY(Type) \
+class Type##Factory : public FactoryBase<Type##Factory, Type##Interface> \
+{}
 
 #endif // FACTORYBASE_H

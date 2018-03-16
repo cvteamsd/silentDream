@@ -4,7 +4,9 @@
 #include "PluginBase.h"
 #include "FactoryBase.h"
 
-class AppFactory;
+
+DECLARE_FACTORY(App);
+
 class AppInterface : public PluginBase<AppFactory, AppInterface>
 {
 public:
@@ -14,12 +16,12 @@ public:
 protected:
     AppInterface() {}
     ~AppInterface() {}
+
+private:
+    DISALLOW_EVIL_CONSTRUCTORS(AppInterface);
 };
 
-class AppFactory : public FactoryBase<AppInterface>, public Singleton<AppFactory>
-{
-
-};
+DEFINE_FACTORY(App);
 
 
 
