@@ -37,6 +37,9 @@ template <typename T>
 class Singleton
 {
 public:
+    virtual ~Singleton() {}
+
+protected:
     static T* instance() {
         if (self == nullptr) {
             pthread_once(&once_control, [] {
@@ -45,6 +48,8 @@ public:
         }
         return self;
     }
+
+    Singleton() {}
 
 private:
     static T* self;
@@ -57,5 +62,11 @@ template <typename T>
 template <typename T>
 pthread_once_t Singleton<T>::once_control = PTHREAD_ONCE_INIT;
 
+static inline std::string str_tolower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(),
+                   [](unsigned char c){ return std::tolower(c); }
+                  );
+    return s;
+}
 
 #endif // GLOBAL_H

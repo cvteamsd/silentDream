@@ -5,7 +5,7 @@ SRC_DIR :=
 DEFINE  :=
 INCLUDE :=
 LDFLAGS := 
-LIBS    := -pthread -lunwind
+LIBS    := -pthread -lunwind -ldl
 
 
 $(call build-target, shared_library)

@@ -2,7 +2,8 @@
 #include "Epoll.h"
 #include "Socket.h"
 
-#include "HelloApp.h"
+#include <SilentDream/PluginManager.h>
+#include <SilentDream/App.h>
 
 SilentDreamClient::SilentDreamClient(ArgumentParser &argParser)
         : mArgParser(argParser)
@@ -35,9 +36,14 @@ int SilentDreamClient::init()
     }
 
     //test
-    bool ret = HelloApp::registerPlugin(HelloApp::name(), HelloApp::creator);
-    LOGI("ret = %d", ret);
-    AppInterface* hello = AppFactory::instance()->create(HelloApp::name());
+    PluginManager::instance()->loadPlugins();
+    App* hello = PluginManager::instance()->create<App>("app.hello");
+    if (hello != nullptr) {
+        hello->start();
+        hello->stop();
+
+        delete hello;
+    }
 
 
     return 0;

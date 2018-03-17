@@ -9,6 +9,8 @@ endif
 CFLAGS := -g -Werror -std=c99 -fPIC
 CXXFLAGS:= -g -Werror -std=c++11 -fPIC
 
+plugin:LIBS += -L$(LIBS_DIR) -lsilentDreamFw
+
 vpath %.c $(SRC_DIR)
 vpath %.cpp $(SRC_DIR)
 SRC := $(foreach dir, $(SRC_DIR), $(wildcard $(dir)/*.c))

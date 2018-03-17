@@ -4,7 +4,7 @@ MODULE  :=
 SRC_DIR :=
 DEFINE  :=
 INCLUDE :=
-LDFLAGS := 
+LDFLAGS := -Wl,-rpath="."
 LIBS    := 
 
 $(call build-target, plugin)

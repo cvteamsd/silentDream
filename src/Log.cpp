@@ -14,7 +14,7 @@ int Log::initLogMode(RunMode runMode)
 {
     char buf[256];
     getcwd(buf, 256);
-//    PRINT("CWD:%s", buf);
+    PRINT("CWD:%s", buf);
 
     if (ensureDirectoryExist("log") < 0) {
         return -1;

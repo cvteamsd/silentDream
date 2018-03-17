@@ -8,7 +8,7 @@ PKGCONFIG += libunwind
 
 INCLUDEPATH += src/include src/modules
 DEFINES +=
-LIBS += -pthread
+LIBS += -pthread -ldl
 
 SOURCES += \
     src/main/main.cpp \
@@ -23,26 +23,22 @@ SOURCES += \
     src/SilentDreamBase.cpp \
     src/CallStack.cpp \
     src/Util.cpp \
-    src/PluginManager.cpp \
-    src/HelloApp.cpp
+    src/PluginManager.cpp
 
 HEADERS += \
+    src/include/SilentDream/Log.h \
+    src/include/SilentDream/Global.h \
+    src/include/SilentDream/Util.h \
+    src/include/SilentDream/PluginManager.h \
+    src/include/SilentDream/App.h \
+    src/include/SilentDream/PluginBase.h \
+    src/include/SilentDream/FactoryBase.h \
     src/ArgumentParser.h \
     src/Epoll.h \
     src/Socket.h \
     src/SilentDreamClient.h \
     src/SilentDreamWorker.h \
     src/SignalHandler.h \
-    src/include/SilentDream/Log.h \
-    src/include/SilentDream/Global.h \
     src/SilentDreamBase.h \
     src/SilentDream.h \
-    src/CallStack.h \
-    src/include/SilentDream/Util.h \
-    src/PluginManager.h \
-    src/AppInterface.h \
-    src/HelloApp.h \
-    src/FactoryDefine.h \
-    src/prepost.h \
-    src/PluginBase.h \
-    src/FactoryBase.h
+    src/CallStack.h
