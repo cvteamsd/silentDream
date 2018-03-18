@@ -71,6 +71,12 @@ void SilentDreamClient::onData(const void *buf, size_t len)
 
 }
 
+void SilentDreamClient::onDisConnected()
+{
+    PRINT("server disConnected!");
+    mLoop->requestExit();
+}
+
 void SilentDreamClient::onError(Socket::ErrorCode err)
 {
 //    LOGE("onError:%#x", err);

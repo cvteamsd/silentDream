@@ -19,6 +19,8 @@ public:
     virtual void onAccepted(int sockFd, struct sockaddr_in* addr, socklen_t addrLen);
     virtual void onError(Socket::ErrorCode);
 
+    void onWorkerFinished(SilentDreamWorker* worker);
+
 private:
     int daemonize();
     int checkRunning(); 

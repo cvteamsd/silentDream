@@ -34,6 +34,9 @@ public:
     int initServer();
     int connect();
     int iniSocket(Poll*poll, struct sockaddr_in* addr, socklen_t addrLen);
+    int sockFd() const {
+        return mSockFd;
+    }
 
     void setClientHandler(SocketClientHandler* clientHandler);
     void setServerHandler(SocketServerHandler* serverHandler);
@@ -63,22 +66,27 @@ private:
     SocketServerHandler* mServerHandler = nullptr;
 };
 
-class SocketClientHandler
+class SocketBaseHandler
+{
+public:
+    virtual ~SocketBaseHandler() = 0;
+    virtual void onData(const void*, size_t) {}
+    virtual void onDisConnected() {}
+    virtual void onError(Socket::ErrorCode) = 0;
+};
+
+class SocketClientHandler : public SocketBaseHandler
 {
 public:
     virtual ~SocketClientHandler() = 0;
     virtual void onConnected() {}
-    virtual void onData(const void*, size_t) {}
-    virtual void onError(Socket::ErrorCode) = 0;
 };
 
-class SocketServerHandler
+class SocketServerHandler : public SocketBaseHandler
 {
 public:
     virtual ~SocketServerHandler() = 0;
-    virtual void onAccepted(int sockFd, struct sockaddr_in* addr, socklen_t addrLen) {}
-    virtual void onData(const void* buf, size_t len) {}
-    virtual void onError(Socket::ErrorCode) = 0;
+    virtual void onAccepted(int , struct sockaddr_in* , socklen_t ) {}
 };
 
 #endif // SOCKET_H

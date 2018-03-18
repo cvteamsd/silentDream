@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <execinfo.h>
 #include <assert.h>
+#include <arpa/inet.h>
 
 #include <SilentDream/Log.h>
 #include <SilentDream/PluginManager.h>
@@ -73,11 +74,13 @@ int SilentDream::destroy()
 
 void SilentDream::onAccepted(int sockFd, struct sockaddr_in *addr, socklen_t addrLen)
 {
+    LOGI("client [%s:%d] connected!", inet_ntoa(addr->sin_addr), ntohs(addr->sin_port));
+
     Socket* s = new Socket(mLoop);
     Poll* poll = new Poll(mLoop, sockFd, s);
     s->iniSocket(poll, addr, addrLen);
 
-    SilentDreamWorker* worker = new SilentDreamWorker(mLoop, s);
+    SilentDreamWorker* worker = new SilentDreamWorker(mLoop, s, this);
     s->setServerHandler(worker);
 
     mWorkers.insert(worker);
@@ -88,6 +91,15 @@ void SilentDream::onError(Socket::ErrorCode err)
 {
 //    LOGE("onError:%#x", err);
 //    mLoop->requestExit();
+}
+
+void SilentDream::onWorkerFinished(SilentDreamWorker *worker)
+{
+    auto it = mWorkers.find(worker);
+    assert(it != mWorkers.end());
+
+    delete worker;
+    mWorkers.erase(worker);
 }
 
 //////////////////////////////////////////////

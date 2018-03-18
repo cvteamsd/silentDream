@@ -6,7 +6,7 @@
 using nlohmann::json;
 
 enum CMD {
-    VERSION = 0x100,
+    VERSION = 100,
     HELP,
     LS,
     STATUS,

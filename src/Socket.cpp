@@ -168,7 +168,6 @@ int Socket::onAccept()
     }
 
     struct sockaddr_in* client_in = (struct sockaddr_in*)&client;
-    LOGI("client:%s:%d", inet_ntoa(client_in->sin_addr), ntohs(client_in->sin_port));
 
     if (mServerHandler) {
         mServerHandler->onAccepted(clientSock, client_in, sockLen);
@@ -221,6 +220,13 @@ void Socket::ioHandler(Poll *p, int status, int event)
     int len;
     uint8_t recvBuf[1024];
 
+    SocketBaseHandler* handler;
+    if (isServer) {
+        handler = s->mServerHandler;
+    } else {
+        handler = s->mClientHandler;
+    }
+
     if (status < 0) {
         event |= EPOLLIN|EPOLLOUT;
     }
@@ -229,25 +235,21 @@ void Socket::ioHandler(Poll *p, int status, int event)
         memset(recvBuf, 0, sizeof(recvBuf));
         len = ::recv(p->fd(), recvBuf, sizeof(recvBuf), 0);
         if (len <= 0) {
+            p->change(p->events()&~EPOLLIN);
+            if (len == 0) {
+                handler->onDisConnected();
+                return;
+            }
+
             fail = true;
             p->change(p->events()&~EPOLLIN);
-            if (len < 0) {
-                LOGE("cbServer error:%s", strerror(errno));
-            }
+            LOGE("cbServer error:%s", strerror(errno));
         }
 
-        if (isServer) {
-            if (!fail) {
-                s->mServerHandler->onData(recvBuf, len);
-            } else {
-                s->mServerHandler->onError(ERROR_RECV);
-            }
+        if (!fail) {
+            handler->onData(recvBuf, len);
         } else {
-            if (!fail) {
-                s->mClientHandler->onData(recvBuf, len);
-            } else {
-                s->mClientHandler->onError(ERROR_RECV);
-            }
+            handler->onError(ERROR_RECV);
         }
     }
 
@@ -259,5 +261,6 @@ void Socket::ioHandler(Poll *p, int status, int event)
 template void Socket::ioHandler<Socket::SERVER>(Poll*, int, int);
 template void Socket::ioHandler<Socket::CLIENT>(Poll*, int, int);
 
+SocketBaseHandler::~SocketBaseHandler() {}
 SocketClientHandler::~SocketClientHandler() {}
 SocketServerHandler::~SocketServerHandler() {}

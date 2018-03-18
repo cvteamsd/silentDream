@@ -42,8 +42,8 @@ void CallStack::unwind(std::ostream& os, std::string tag)
 
         if (entry) {
             os.fill('0');
-//            os << "  " << tag << " #" << std::setw(2) << std::right << step << "  " << std::setw(8) << (ip - (unw_word_t)entry->start);
-            os << "  " << tag << " #" << std::setw(2) << std::right << step << "  " << std::setw(8) << ip;
+            os << "  " << tag << " #" << std::setw(2) << std::right << step << "  " << std::setw(8) << (ip - (unw_word_t)entry->start);
+//            os << "  " << tag << " #" << std::setw(2) << std::right << step << "  " << std::setw(8) << ip;
             os.fill(' ');
             os << "  " << std::setw(70) << std::left << entry->name << "  ";
         } else {
@@ -129,7 +129,9 @@ bool CallStack::ParseLine(const char *line, MapEntry *entry)
 //    LOGV("Parsed map: start=%p, end=%p, flags=%x, name=%s",
 //          reinterpret_cast<void*>(entry->start), reinterpret_cast<void*>(entry->end),
 //          entry->flags, entry->name.c_str());
-    return true;
+    if (entry->flags & PROT_EXEC)
+        return true;
+    return false;
 }
 
 const CallStack::MapEntry* CallStack::findMapEntry(uintptr_t addr) const

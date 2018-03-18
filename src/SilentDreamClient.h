@@ -19,6 +19,7 @@ public:
 
     virtual void onConnected();
     virtual void onData(const void* buf, size_t len);
+    virtual void onDisConnected();
     virtual void onError(Socket::ErrorCode);
 
 private:

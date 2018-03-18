@@ -1,10 +1,13 @@
+#include <arpa/inet.h>
 #include <SilentDream/PluginManager.h>
 #include <SilentDream/App.h>
 #include "SilentDreamWorker.h"
+#include "SilentDream.h"
 
-SilentDreamWorker::SilentDreamWorker(Loop *loop, Socket *socket)
+SilentDreamWorker::SilentDreamWorker(Loop *loop, Socket *socket, SilentDream* silentDream)
  : mLoop(loop)
  , mSocket(socket)
+ , mManager(silentDream)
 {
 }
 
@@ -35,6 +38,15 @@ void SilentDreamWorker::onError(Socket::ErrorCode err)
 {
 //    LOGE("onError:%#x", err);
 
+}
+
+void SilentDreamWorker::onDisConnected()
+{
+    struct sockaddr_in addr;
+    socklen_t addrLen = sizeof(struct sockaddr_in);
+    ::getpeername(mSocket->sockFd(), (struct sockaddr*)&addr, &addrLen);
+    LOGI("client [%s:%d] disConnected!", inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+    mManager->onWorkerFinished(this);
 }
 
 ////////////////////////////////////////////////////
