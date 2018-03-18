@@ -242,7 +242,6 @@ void Socket::ioHandler(Poll *p, int status, int event)
             }
 
             fail = true;
-            p->change(p->events()&~EPOLLIN);
             LOGE("cbServer error:%s", strerror(errno));
         }
 
