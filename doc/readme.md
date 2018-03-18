@@ -69,10 +69,58 @@ make uninstall
 
 #### 5. run 
 ##### 5.1 run
+* start server/daemon, just run silentdream without any arguments.
 ```
-silentDream [args]
+silentdream
 ```
 
+server log:
+```
+===================================================================
+03-18 19:50:23.349 23805 23805 I SilentDream.cpp:49 silentdream daemon start...
+03-18 19:50:23.349 23805 23805 I SilentDream.cpp:50 RootDir:/home/whr/workspace/project/silentDream/build
+03-18 19:50:23.350 23805 23805 V PluginManager.cpp:42 load plugin: libhello.so success!
+03-18 19:50:23.350 23805 23805 I Socket.cpp:75 server:0.0.0.0:28979
+
+```
+
+* run as client.
+```
+silentdream [version] [help] [ls] [status] [start plugin-name] [stop plugin-name]
+```
+
+1. show help
+```
+$ ./build/silentdream  help
+command line arguments:
+    {"arg-num":0,"cmd":257,"what":"help"}
+    03-18 19:50:25.890 23808 23808 I Socket.cpp:96 connect to:127.0.0.1:28979
+    03-18 19:50:25.890 23808 23808 I Socket.cpp:202 cbConnect success!
+    Server response:
+        {"commands":["version","help","ls","status","start","stop"],"what":"help"}
+```
+
+2. start `"app.hello"`
+```
+$ ./build/silentdream  start app.hello
+command line arguments:
+    {"arg-1":"app.hello","arg-num":1,"cmd":260,"what":"start"}
+    03-18 19:52:36.734 24022 24022 I Socket.cpp:96 connect to:127.0.0.1:28979
+    03-18 19:52:36.734 24022 24022 I Socket.cpp:202 cbConnect success!
+    Server response:
+        {"status":"success","what":"start"}
+ ```
+
+3. start `"app.hello"`
+ ```
+ $ ./build/silentdream  stop  app.hello
+ command line arguments:
+    {"arg-1":"app.hello","arg-num":1,"cmd":261,"what":"stop"}
+    03-18 19:53:33.773 24138 24138 I Socket.cpp:96 connect to:127.0.0.1:28979
+    03-18 19:53:33.773 24138 24138 I Socket.cpp:202 cbConnect success!
+    Server response:
+        {"status":"success","what":"stop"}
+ ```
 
 ##### 5.2 view running silentdream daemon
 ```
