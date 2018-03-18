@@ -11,6 +11,7 @@
 #include <assert.h>
 
 #include <SilentDream/Log.h>
+#include <SilentDream/PluginManager.h>
 #include "SilentDream.h"
 #include "SilentDreamWorker.h"
 #include "ArgumentParser.h"
@@ -45,20 +46,12 @@ int SilentDream::init()
     }
 
     SilentDreamBase::init();
-
     LOGI("silentdream daemon start...");
     LOGI("RootDir:%s", getRootDir());
 
+    PluginManager::instance()->loadPlugins();
 
-    mSocket = new Socket(mLoop);
-    mSocket->setServerHandler(this);
-    if (mSocket->initAddress("0.0.0.0") < 0) {
-        return -1;
-    }
-    if (mSocket->createSocket() < 0) {
-        return -1;
-    }
-    if (mSocket->initServer() < 0) {
+    if (initServer() < 0) {
         return -1;
     }
 
@@ -93,7 +86,8 @@ void SilentDream::onAccepted(int sockFd, struct sockaddr_in *addr, socklen_t add
 
 void SilentDream::onError(Socket::ErrorCode err)
 {
-
+//    LOGE("onError:%#x", err);
+//    mLoop->requestExit();
 }
 
 //////////////////////////////////////////////
@@ -158,6 +152,23 @@ int SilentDream::checkRunning()
     char buf[16];
     sprintf(buf, "%ld", (long)getpid());
     write(fd, buf, strlen(buf)+1);
+
+    return 0;
+}
+
+int SilentDream::initServer()
+{
+    mSocket = new Socket(mLoop);
+    mSocket->setServerHandler(this);
+    if (mSocket->initAddress("0.0.0.0") < 0) {
+        return -1;
+    }
+    if (mSocket->createSocket() < 0) {
+        return -1;
+    }
+    if (mSocket->initServer() < 0) {
+        return -1;
+    }
 
     return 0;
 }

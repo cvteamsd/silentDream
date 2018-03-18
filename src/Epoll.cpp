@@ -31,7 +31,7 @@ void Loop::run()
 
     for (;;) {
         if (mObjects.size() == 0) {
-            LOGI("Epoll loop exited!");
+//            LOGI("Epoll loop exited!");
             break;
         }
 
@@ -159,7 +159,7 @@ void Loop::requestExit()
 {
     std::lock_guard<std::recursive_mutex> _l(mRequestLock);
 
-    LOGI("Epoll loop request exit...");
+//    LOGI("Epoll loop request exit...");
     mRequests.clear();
     auto cb = [this](void *) {
         //check whether iterator invalid !!!

@@ -2,23 +2,44 @@
 #define _ARGUMENT_PARSER_H
 
 #include <SilentDream/Global.h>
+#include <SilentDream/json.hpp>
+using nlohmann::json;
+
+enum CMD {
+    VERSION = 0x100,
+    HELP,
+    LS,
+    STATUS,
+    START,
+    STOP,
+};
+
+struct ParameterDesc {
+    std::string what;
+    CMD cmd;
+    int argNum;
+};
+
 
 class ArgumentParser {
 public:
     ArgumentParser(int argc, char **argv);
+    ~ArgumentParser();
+
     int initCheck();
-
-    RunMode getRunMode() const;
-
+    int parse(json& result);
+    RunMode getRunMode() const {
+        return mRunMOde;
+    }
 
 private:
-    int parse();
+    int mArgc;
+    char **mArgv;
 
-    int argc;
-    char **argv;
-
+    std::map<std::string, struct ParameterDesc*> mParameterDescTable;
+    RunMode mRunMOde = RUN_MODE_CLIENT;
+    std::string mCurrentArg;
+    struct ParameterDesc* mCurrentArgDesc = nullptr;
 };
-
-
 
 #endif

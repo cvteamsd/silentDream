@@ -93,7 +93,7 @@ int Socket::initServer()
 
 int Socket::connect()
 {
-    LOGI("connect:%s:%d", inet_ntoa(mSockAddr.sin_addr), ntohs(mSockAddr.sin_port));
+    LOGI("connect to:%s:%d", inet_ntoa(mSockAddr.sin_addr), ntohs(mSockAddr.sin_port));
 
     int err = ::connect(mSockFd, (struct sockaddr*)&mSockAddr, mSockAddrLen);
     if (err == 0) {
@@ -229,10 +229,11 @@ void Socket::ioHandler(Poll *p, int status, int event)
         memset(recvBuf, 0, sizeof(recvBuf));
         len = ::recv(p->fd(), recvBuf, sizeof(recvBuf), 0);
         if (len <= 0) {
-            if (len < 0)
+            fail = true;
+            p->change(p->events()&~EPOLLIN);
+            if (len < 0) {
                 LOGE("cbServer error:%s", strerror(errno));
-           fail = true;
-           p->change(p->events()&~EPOLLIN);
+            }
         }
 
         if (isServer) {

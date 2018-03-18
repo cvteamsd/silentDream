@@ -3,28 +3,40 @@
 
 #include <string>
 #include <map>
+#include <set>
 #include <algorithm>
 #include <SilentDream/Global.h>
 #include <SilentDream/Log.h>
 
-template <typename Interface>
 class FactoryBase
 {
 public:
-    typedef typename Interface::Creator Creator;
+    typedef void* (*Creator)();
 
     bool registerPlugin(std::string name, Creator c) {
-//        LOGV("register plugin:%s", name.c_str());
+        mPlugins.insert(name);
         auto it = mCreators.insert({name, c});
         return it.second;
     }
 
-    Interface* create(std::string name) {
+    void* create(std::string name) {
         auto it = mCreators.find(name);
         if (it != mCreators.end()) {
             return it->second();
         }
         return nullptr;
+    }
+
+    const std::set<std::string>& plugins() const {
+        return mPlugins;
+    }
+
+    typedef std::map<std::string,Creator>::const_iterator PluginIterator;
+    PluginIterator cbegin() const {
+        return mCreators.cbegin();
+    }
+    PluginIterator cend() const {
+        return mCreators.cend();
     }
 
 protected:
@@ -33,6 +45,7 @@ protected:
 
 private:
     std::map<std::string, Creator> mCreators;
+    std::set<std::string> mPlugins;
 
     DISALLOW_EVIL_CONSTRUCTORS(FactoryBase);
 };
@@ -43,14 +56,14 @@ private:
 #define DECLARE_FACTORY(Interface) class Interface##Factory
 
 #define DEFINE_FACTORY(Interface) \
-class Interface##Factory : public FactoryBase<Interface>, public Singleton<Interface##Factory> \
+class Interface##Factory : public FactoryBase, public Singleton<Interface##Factory> \
 { \
     using Singleton<Interface##Factory>::instance; \
     friend Singleton<Interface##Factory>; \
-    friend class PluginBase<Interface, Interface##Factory>; \
+    friend class PluginBase<Interface##Factory>; \
                             \
     Interface##Factory() {  \
-        void* pFactoryBase = static_cast<FactoryBase<Interface>*>(this); \
+        FactoryBase* pFactoryBase = static_cast<FactoryBase*>(this); \
         PluginManager::instance()->registerFactory(Interface::interfaceName(), pFactoryBase); \
     }; \
     ~Interface##Factory() {} \

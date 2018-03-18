@@ -3,6 +3,7 @@
 
 #include <sstream>
 #include <map>
+#include <set>
 #include <SilentDream/Global.h>
 #include <SilentDream/Log.h>
 #include <SilentDream/FactoryBase.h>
@@ -16,12 +17,13 @@ public:
 
     void loadPlugins();
 
-    bool registerFactory(std::string interfaceName, void* interfaceFactory) {
+    bool registerFactory(std::string interfaceName, FactoryBase* interfaceFactory) {
+        mInterfaces.insert(interfaceName);
         auto it = mFactories.insert({interfaceName, interfaceFactory});
         return it.second;
     }
 
-    template <typename T>
+    template <typename T=void>
     T* create(std::string pluginName) {
         T* plugin = nullptr;
 
@@ -31,21 +33,34 @@ public:
         std::getline(ss, interfaceName, '.');
         std::getline(ss, name);
 
-        void* factory = findFactory(interfaceName);
+        FactoryBase* factory = findFactory(interfaceName);
         if (factory != nullptr) {
-            FactoryBase<T>* factoryBase = static_cast<FactoryBase<T>*>(factory);
-            plugin = factoryBase->create(pluginName);
+            plugin = static_cast<T*>(factory->create(pluginName));
         }
         return plugin;
     }
 
-    void* findFactory(std::string interfaceName);
+    FactoryBase* findFactory(std::string interfaceName);
+
+    const std::set<std::string>& interfaces() const {
+        return mInterfaces;
+    }
+
+    typedef std::map<std::string, FactoryBase*>::const_iterator InterfaceIterator;
+    InterfaceIterator cbegin() const {
+        return mFactories.cbegin();
+    }
+
+    InterfaceIterator cend() const {
+        return mFactories.cend();
+    }
 
 private:
     PluginManager() {}
     ~PluginManager() {}
 
-    std::map<std::string, void*> mFactories;
+    std::map<std::string, FactoryBase*> mFactories;
+    std::set<std::string> mInterfaces;
 };
 
 

@@ -3,11 +3,11 @@
 
 #include <SilentDream/Global.h>
 
-template <typename Interface, typename Factory>
+template <typename Factory>
 class PluginBase
 {
 public:
-    typedef Interface* (*Creator)();
+    typedef void* (*Creator)();
 
     static bool registerPlugin(std::string name, Creator creator) {
         return Factory::instance()->registerPlugin(name, creator);
@@ -33,7 +33,7 @@ static std::string name() {  \
     return str_tolower(s);            \
 }							 \
                              \
-static Interface* creator() { \
+static void* creator() { \
     return new Name##Interface(); 		\
 }
 

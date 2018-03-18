@@ -1,5 +1,5 @@
 TEMPLATE = app
-CONFIG += console c++11
+CONFIG += console c++14
 CONFIG -= app_bundle
 CONFIG -= qt
 
@@ -33,6 +33,7 @@ HEADERS += \
     src/include/SilentDream/App.h \
     src/include/SilentDream/PluginBase.h \
     src/include/SilentDream/FactoryBase.h \
+    src/include/SilentDream/json.hpp \
     src/ArgumentParser.h \
     src/Epoll.h \
     src/Socket.h \

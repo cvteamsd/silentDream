@@ -44,7 +44,7 @@ void PluginManager::loadPlugins()
     ::closedir(plugin_dir);
 }
 
-void* PluginManager::findFactory(std::string interfaceName) {
+FactoryBase* PluginManager::findFactory(std::string interfaceName) {
     auto it = mFactories.find(interfaceName);
     if (it != mFactories.end()) {
         return it->second;

@@ -16,7 +16,7 @@ int initRootDir()
     }
 
     char *dir = dirname(path);
-    PRINT("Root dir:%s", path);
+//    PRINT("Root dir:%s", path);
 
     err = chdir(dir);
     if (err < 0) {

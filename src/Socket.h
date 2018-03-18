@@ -20,7 +20,7 @@ public:
     };
 
     enum ErrorCode {
-        ERROR_UNKNOWN = 1000,
+        ERROR_UNKNOWN = 0x1000,
         ERROR_CONNECT,
         ERROR_RECV,
         ERROR_SEND,

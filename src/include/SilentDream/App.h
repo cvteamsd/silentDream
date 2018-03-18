@@ -7,7 +7,7 @@
 
 DECLARE_FACTORY(App);
 
-class App : public PluginBase<App, AppFactory>
+class App : public PluginBase<AppFactory>
 {
 public:
     INTERFACE_META(App)

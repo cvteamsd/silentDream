@@ -7,7 +7,7 @@ ifeq ($(MODULE),)
 endif
 
 CFLAGS := -g -Werror -std=c99 -fPIC
-CXXFLAGS:= -g -Werror -std=c++11 -fPIC
+CXXFLAGS:= -g -Werror -std=c++14 -fPIC
 
 plugin:LIBS += -L$(LIBS_DIR) -lsilentDreamFw
 

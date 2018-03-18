@@ -3,6 +3,7 @@
 
 #include "SilentDreamBase.h"
 #include "Socket.h"
+#include "ArgumentParser.h"
 
 class ArgumentParser;
 class Socket;
@@ -21,8 +22,11 @@ public:
     virtual void onError(Socket::ErrorCode);
 
 private:
+    int connectServer();
+
     ArgumentParser& mArgParser;
     Socket* mSocket = nullptr;
+    json mArgs;
 
     DISALLOW_EVIL_CONSTRUCTORS(SilentDreamClient);
 };

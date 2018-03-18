@@ -20,15 +20,13 @@ public:
     virtual void onError(Socket::ErrorCode);
 
 private:
-    SilentDream(const SilentDream&);
-    SilentDream& operator=(const SilentDream&);
-
     int daemonize();
     int checkRunning(); 
+    int initServer();
 
-private:
     Socket* mSocket = nullptr;
     std::set<SilentDreamWorker*> mWorkers;
+    DISALLOW_EVIL_CONSTRUCTORS(SilentDream);
 };
 
 

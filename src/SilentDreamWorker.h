@@ -2,6 +2,7 @@
 #define SILENTDREAMWORKER_H
 
 #include "Socket.h"
+#include "ArgumentParser.h"
 
 class SilentDreamWorker : public SocketServerHandler
 {
@@ -13,8 +14,12 @@ public:
     virtual void onError(Socket::ErrorCode);
 
 private:
+    int handleRequest(const json &request, json &response);
+
     Loop* mLoop;
     Socket* mSocket;
+
+    DISALLOW_EVIL_CONSTRUCTORS(SilentDreamWorker);
 };
 
 #endif // SILENTDREAMWORKER_H
