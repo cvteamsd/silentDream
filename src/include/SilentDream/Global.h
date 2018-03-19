@@ -56,6 +56,8 @@ protected:
 private:
     static T* self;
     static pthread_once_t once_control;
+
+    DISALLOW_EVIL_CONSTRUCTORS(Singleton);
 };
 
 template <typename T>

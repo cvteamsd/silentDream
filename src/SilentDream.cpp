@@ -76,6 +76,10 @@ void SilentDream::onAccepted(int sockFd, struct sockaddr_in *addr, socklen_t add
 {
     LOGI("client [%s:%d] connected!", inet_ntoa(addr->sin_addr), ntohs(addr->sin_port));
 
+    if (fcntl(sockFd, F_SETFL, fcntl(sockFd, F_GETFL) | O_NONBLOCK) < 0) {
+        LOGW("set client socket nonblock failed!", strerror(errno));
+    }
+
     Socket* s = new Socket(mLoop);
     Poll* poll = new Poll(mLoop, sockFd, s);
     s->iniSocket(poll, addr, addrLen);
